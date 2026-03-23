@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SHRED">
+<meta name="theme-color" content="#0a0a0f">
+<title>SHRED — Skylar's Program</title>
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxODAgMTgwIj48cmVjdCB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgcng9IjQwIiBmaWxsPSIjMGEwYTBmIi8+PHRleHQgeD0iOTAiIHk9IjEwNSIgZm9udC1mYW1pbHk9IkhlbHZldGljYSxBcmlhbCxzYW5zLXNlcmlmIiBmb250LXNpemU9IjU2IiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSIjZTBmMmUwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5TSFJFRC9zdmc+">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&family=Outfit:wght@300;400;600;700;800;900&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+--bg:#0a0a0f;--bg2:#12121a;--bg3:#1a1a26;--bg4:#222233;
+--text:#e8e8f0;--text2:#9999aa;--text3:#666677;
+--accent:#c8f7c5;--accent2:#7ef078;--accent3:#2a4a28;
+--red:#ff6b6b;--orange:#ffaa5c;--blue:#5c9eff;--purple:#b07ef0;
+--border:#2a2a3a;
+--radius:12px;--radius-sm:8px;
+}
+html{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);overscroll-behavior:none}
+body{min-height:100dvh;padding:env(safe-area-inset-top) 0 calc(70px + env(safe-area-inset-bottom)) 0;background:var(--bg)}
+
+/* NAV */
+.nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--bg2);border-top:1px solid var(--border);padding:8px 0 calc(8px + env(safe-area-inset-bottom));z-index:100;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);background:rgba(18,18,26,.92)}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;border:none;background:none;color:var(--text3);font-family:'Outfit';font-size:10px;font-weight:600;cursor:pointer;transition:.2s}
+.nav-btn.active{color:var(--accent)}
+.nav-btn svg{width:22px;height:22px;stroke:currentColor;stroke-width:2;fill:none}
+
+/* HEADER */
+.header{padding:16px 20px 12px;position:sticky;top:0;z-index:50;background:rgba(10,10,15,.9);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.header h1{font-family:'JetBrains Mono';font-size:13px;font-weight:800;letter-spacing:3px;color:var(--accent);text-transform:uppercase}
+.header p{font-size:12px;color:var(--text2);margin-top:2px}
+
+/* WEEK SELECTOR */
+.week-tabs{display:flex;gap:6px;padding:8px 20px 12px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}
+.week-tabs::-webkit-scrollbar{display:none}
+.week-tab{flex-shrink:0;padding:8px 16px;border-radius:20px;border:1px solid var(--border);background:var(--bg2);color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;transition:.2s;white-space:nowrap}
+.week-tab.active{background:var(--accent3);border-color:var(--accent);color:var(--accent)}
+.week-tab .pct{font-family:'JetBrains Mono';font-size:10px;margin-left:4px;opacity:.7}
+
+/* DAY CARDS */
+.days-container{padding:0 16px 20px}
+.day-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden;transition:.2s}
+.day-card.completed{border-color:var(--accent3);opacity:.7}
+.day-header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;cursor:pointer;-webkit-user-select:none;user-select:none}
+.day-header h3{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px}
+.day-header h3 .tag{font-family:'JetBrains Mono';font-size:9px;font-weight:700;padding:3px 7px;border-radius:4px;letter-spacing:1px;text-transform:uppercase}
+.tag-chest{background:#3a2040;color:#f0a0d0}
+.tag-legs{background:#1a3040;color:#70c0f0}
+.tag-core{background:#3a3a10;color:#e0d060}
+.tag-pull{background:#102a3a;color:#60b0e0}
+.tag-dead{background:#3a2020;color:#f09090}
+.tag-shoulder{background:#2a1a3a;color:#c090f0}
+.day-progress{display:flex;align-items:center;gap:8px}
+.day-progress span{font-family:'JetBrains Mono';font-size:11px;color:var(--text2)}
+.check-ring{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;transition:.2s}
+.check-ring.done{border-color:var(--accent);background:var(--accent3)}
+.check-ring.done::after{content:'✓';color:var(--accent);font-size:14px;font-weight:700}
+
+/* SECTIONS */
+.day-body{display:none;padding:0 12px 12px}
+.day-card.open .day-body{display:block}
+.section{margin-top:8px;border-radius:var(--radius-sm);overflow:hidden}
+.section-header{font-family:'JetBrains Mono';font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.section-header .toggle{font-size:14px;transition:.2s}
+.section.collapsed .section-body{display:none}
+.section.collapsed .toggle{transform:rotate(-90deg)}
+
+.s-warmup .section-header{background:#1a2a1a;color:#80c080}
+.s-superset .section-header{background:#1a1a2e;color:#8888cc}
+.s-core .section-header{background:#2e2a1a;color:#ccaa55}
+.s-cardio .section-header{background:#2e1a1a;color:#cc7755}
+.s-mobility .section-header{background:#2a1a2e;color:#aa77cc}
+
+/* EXERCISE ROWS */
+.ex-row{display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.04);transition:.15s}
+.ex-row:last-child{border-bottom:none}
+.ex-check{width:24px;height:24px;border-radius:6px;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:.2s}
+.ex-check.checked{background:var(--accent3);border-color:var(--accent)}
+.ex-check.checked::after{content:'✓';color:var(--accent);font-size:12px;font-weight:800}
+.ex-info{flex:1;min-width:0}
+.ex-name{font-size:13px;font-weight:600;line-height:1.3;transition:.2s}
+.ex-row.done .ex-name{color:var(--text3);text-decoration:line-through}
+.ex-detail{display:flex;gap:8px;margin-top:2px;flex-wrap:wrap}
+.ex-reps{font-family:'JetBrains Mono';font-size:11px;color:var(--accent2);font-weight:700}
+.ex-notes{font-size:11px;color:var(--text3);font-style:italic}
+
+/* PROGRESS BAR */
+.progress-bar{height:3px;background:var(--bg);border-radius:2px;overflow:hidden;margin-top:4px}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent3),var(--accent));border-radius:2px;transition:width .4s ease}
+
+/* OVERVIEW PAGE */
+.page{display:none;padding:16px 20px 20px}
+.page.active{display:block}
+.overview-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:12px}
+.overview-card h3{font-family:'JetBrains Mono';font-size:11px;letter-spacing:2px;color:var(--text2);text-transform:uppercase;margin-bottom:12px}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stat{text-align:center}
+.stat .num{font-family:'JetBrains Mono';font-size:28px;font-weight:800;color:var(--accent)}
+.stat .label{font-size:11px;color:var(--text3);margin-top:2px}
+.goal-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
+.goal-row:last-child{border-bottom:none}
+.goal-name{font-size:13px;font-weight:600}
+.goal-vals{display:flex;align-items:center;gap:8px}
+.goal-current{font-family:'JetBrains Mono';font-size:14px;color:var(--text2)}
+.goal-arrow{color:var(--text3);font-size:12px}
+.goal-target{font-family:'JetBrains Mono';font-size:14px;color:var(--accent);font-weight:700}
+
+/* RESET BUTTON */
+.reset-section{margin-top:24px;text-align:center}
+.reset-btn{background:var(--bg3);border:1px solid var(--border);color:var(--red);font-family:'Outfit';font-size:13px;font-weight:600;padding:10px 24px;border-radius:var(--radius-sm);cursor:pointer}
+.reset-week-btn{background:var(--bg3);border:1px solid var(--border);color:var(--orange);font-family:'Outfit';font-size:12px;font-weight:600;padding:8px 16px;border-radius:var(--radius-sm);cursor:pointer;margin-top:12px;display:block;width:100%}
+
+/* ============================================================
+   TESTING PAGE
+   ============================================================ */
+.test-section{margin-bottom:20px}
+.test-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:12px}
+.test-card-header{padding:14px 16px 10px;border-bottom:1px solid var(--border)}
+.test-card-header h3{font-family:'JetBrains Mono';font-size:11px;letter-spacing:2px;color:var(--text2);text-transform:uppercase}
+.test-card-header p{font-size:11px;color:var(--text3);margin-top:3px}
+
+/* Input form */
+.log-form{padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.log-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.log-row.single{grid-template-columns:1fr}
+.input-group{display:flex;flex-direction:column;gap:4px}
+.input-group label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px}
+.input-group input{background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);font-family:'JetBrains Mono';font-size:14px;padding:10px 12px;outline:none;transition:.2s;width:100%;-webkit-appearance:none}
+.input-group input:focus{border-color:var(--accent);background:var(--bg4)}
+.input-group input::placeholder{color:var(--text3)}
+.log-btn{background:var(--accent3);border:1px solid var(--accent);color:var(--accent);font-family:'Outfit';font-size:13px;font-weight:700;padding:12px;border-radius:var(--radius-sm);cursor:pointer;transition:.2s;letter-spacing:.5px}
+.log-btn:active{opacity:.8;transform:scale(.98)}
+.log-btn.secondary{background:var(--bg3);border-color:var(--border);color:var(--text2)}
+
+/* PR badge */
+.pr-badge{display:inline-block;font-family:'JetBrains Mono';font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;letter-spacing:1px;background:#3a2a10;color:#ffaa5c;vertical-align:middle;margin-left:6px}
+
+/* History table */
+.history-wrap{overflow-x:auto;padding:0 16px 12px}
+.history-table{width:100%;border-collapse:collapse;min-width:280px}
+.history-table th{font-family:'JetBrains Mono';font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);padding:6px 8px;text-align:left;border-bottom:1px solid var(--border)}
+.history-table td{font-size:12px;padding:8px 8px;border-bottom:1px solid rgba(255,255,255,.03);color:var(--text2)}
+.history-table td:first-child{color:var(--text3);font-family:'JetBrains Mono';font-size:11px}
+.history-table td.val{font-family:'JetBrains Mono';font-size:13px;font-weight:700;color:var(--text)}
+.history-table tr:last-child td{border-bottom:none}
+.history-table tr.is-pr td{background:rgba(255,170,92,.05)}
+.history-table tr.is-pr td.val{color:var(--orange)}
+.empty-state{padding:20px;text-align:center;color:var(--text3);font-size:13px}
+
+/* Current bests strip */
+.bests-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:14px 16px}
+.best-item{background:var(--bg3);border-radius:var(--radius-sm);padding:10px 12px}
+.best-item .best-label{font-size:10px;color:var(--text3);margin-bottom:3px}
+.best-item .best-val{font-family:'JetBrains Mono';font-size:18px;font-weight:800;color:var(--accent)}
+.best-item .best-val span{font-size:11px;font-weight:400;color:var(--text3);margin-left:2px}
+.best-item .best-date{font-size:10px;color:var(--text3);margin-top:2px}
+
+/* Lift tabs */
+.lift-tabs{display:flex;gap:6px;padding:14px 16px 0;overflow-x:auto;scrollbar-width:none}
+.lift-tabs::-webkit-scrollbar{display:none}
+.lift-tab{flex-shrink:0;padding:6px 14px;border-radius:16px;border:1px solid var(--border);background:var(--bg3);color:var(--text3);font-size:12px;font-weight:600;cursor:pointer;transition:.2s;white-space:nowrap}
+.lift-tab.active{background:#1a1a2e;border-color:#8888cc;color:#aaaaee}
+
+/* Trend mini chart */
+.trend-bar-wrap{padding:8px 16px 14px;display:flex;align-items:flex-end;gap:3px;height:60px}
+.trend-bar{flex:1;background:var(--accent3);border-radius:3px 3px 0 0;min-height:4px;transition:.3s;position:relative;cursor:default}
+.trend-bar.latest{background:var(--accent2)}
+.trend-bar[data-tip]:hover::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:var(--bg4);color:var(--text);font-size:10px;padding:3px 6px;border-radius:4px;white-space:nowrap;pointer-events:none;font-family:'JetBrains Mono';z-index:10}
+
+.delete-entry-btn{background:none;border:none;color:var(--text3);cursor:pointer;font-size:12px;padding:2px 6px;border-radius:4px;transition:.2s}
+.delete-entry-btn:hover{color:var(--red);background:rgba(255,107,107,.1)}
+
+/* Toast */
+.toast{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg3);border:1px solid var(--border);color:var(--text);font-size:13px;font-weight:600;padding:10px 20px;border-radius:20px;opacity:0;transition:.3s;pointer-events:none;z-index:200;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.pr{border-color:var(--orange);color:var(--orange)}
+</style>
+</head>
+<body>
+
+<div class="header">
+<h1>SHRED//PROGRAM</h1>
+<p id="headerSub">Phase 1 — Weight Loss Focus</p>
+</div>
+
+<!-- WORKOUT PAGE -->
+<div class="page active" id="pageworkout">
+<div class="week-tabs" id="weekTabs"></div>
+<div class="days-container" id="daysContainer"></div>
+<button class="reset-week-btn" onclick="resetCurrentWeek()">Reset This Week's Progress</button>
+</div>
+
+<!-- OVERVIEW PAGE -->
+<div class="page" id="pageoverview">
+<div class="overview-card">
+<h3>Program Progress</h3>
+<div class="stat-grid">
+<div class="stat"><div class="num" id="totalCompleted">0</div><div class="label">Workouts Done</div></div>
+<div class="stat"><div class="num" id="totalPct">0%</div><div class="label">Phase 1 Complete</div></div>
+<div class="stat"><div class="num" id="streakCount">0</div><div class="label">Day Streak</div></div>
+<div class="stat"><div class="num" id="weekNum">1</div><div class="label">Current Week</div></div>
+</div>
+</div>
+<div class="overview-card">
+<h3>Strength Goals</h3>
+<div class="goal-row"><span class="goal-name">Bench Press</span><div class="goal-vals"><span class="goal-current" id="ov-bench">–</span><span class="goal-arrow">→</span><span class="goal-target">260</span></div></div>
+<div class="goal-row"><span class="goal-name">Squat</span><div class="goal-vals"><span class="goal-current" id="ov-squat">–</span><span class="goal-arrow">→</span><span class="goal-target">315</span></div></div>
+<div class="goal-row"><span class="goal-name">Deadlift</span><div class="goal-vals"><span class="goal-current" id="ov-dead">–</span><span class="goal-arrow">→</span><span class="goal-target">315</span></div></div>
+</div>
+<div class="overview-card">
+<h3>Weight Goal</h3>
+<div class="goal-row"><span class="goal-name">Current</span><div class="goal-vals"><span class="goal-current" id="ov-weight">–</span><span class="goal-arrow">→</span><span class="goal-target">195</span></div></div>
+<div class="goal-row"><span class="goal-name">End of April</span><div class="goal-vals"><span class="goal-target">220</span></div></div>
+<div class="goal-row"><span class="goal-name">End of June</span><div class="goal-vals"><span class="goal-target">210</span></div></div>
+<div class="goal-row"><span class="goal-name">End of July</span><div class="goal-vals"><span class="goal-target">205</span></div></div>
+<div class="goal-row"><span class="goal-name">End of September</span><div class="goal-vals"><span class="goal-target">195</span></div></div>
+</div>
+<div class="overview-card">
+<h3>Endurance</h3>
+<div class="goal-row"><span class="goal-name">Half Marathon</span><div class="goal-vals"><span class="goal-target">November</span></div></div>
+</div>
+<div class="reset-section"><button class="reset-btn" onclick="resetAll()">Reset All Progress</button></div>
+</div>
+
+<!-- TESTING PAGE -->
+<div class="page" id="pagetesting">
+
+  <!-- WEIGHT LOG -->
+  <div class="test-section">
+    <div class="test-card">
+      <div class="test-card-header">
+        <h3>Body Weight</h3>
+        <p>Log your current weight to track progress toward 195 lbs</p>
+      </div>
+      <div class="log-form">
+        <div class="log-row">
+          <div class="input-group">
+            <label>Weight (lbs)</label>
+            <input type="number" id="inp-weight" placeholder="e.g. 222" step="0.1" min="100" max="400">
+          </div>
+          <div class="input-group">
+            <label>Date</label>
+            <input type="date" id="inp-weight-date">
+          </div>
+        </div>
+        <div class="input-group log-row single">
+          <label>Notes (optional)</label>
+          <input type="text" id="inp-weight-note" placeholder="e.g. morning, after workout…">
+        </div>
+        <button class="log-btn" onclick="logWeight()">Log Weight</button>
+      </div>
+      <!-- Current best -->
+      <div id="weight-bests" class="bests-grid" style="display:none"></div>
+      <!-- Trend bars -->
+      <div id="weight-trend" class="trend-bar-wrap" style="display:none"></div>
+      <!-- History -->
+      <div id="weight-history" class="history-wrap"></div>
+    </div>
+  </div>
+
+  <!-- LIFT PRs -->
+  <div class="test-section">
+    <div class="test-card">
+      <div class="test-card-header">
+        <h3>Lift PRs</h3>
+        <p>Log any new personal records — PRs are highlighted automatically</p>
+      </div>
+      <!-- Lift selector tabs -->
+      <div class="lift-tabs" id="liftTabs">
+        <div class="lift-tab active" data-lift="bench" onclick="switchLift(this)">Bench Press</div>
+        <div class="lift-tab" data-lift="squat" onclick="switchLift(this)">Squat</div>
+        <div class="lift-tab" data-lift="deadlift" onclick="switchLift(this)">Deadlift</div>
+        <div class="lift-tab" data-lift="ohp" onclick="switchLift(this)">OHP</div>
+        <div class="lift-tab" data-lift="row" onclick="switchLift(this)">BB Row</div>
+        <div class="lift-tab" data-lift="other" onclick="switchLift(this)">Other</div>
+      </div>
+      <div class="log-form">
+        <div class="log-row" id="lift-name-row" style="display:none">
+          <div class="input-group" style="grid-column:1/-1">
+            <label>Lift Name</label>
+            <input type="text" id="inp-lift-name" placeholder="e.g. Pull Up, Hip Thrust…">
+          </div>
+        </div>
+        <div class="log-row">
+          <div class="input-group">
+            <label>Weight (lbs)</label>
+            <input type="number" id="inp-lift-weight" placeholder="e.g. 225" step=5 min="0">
+          </div>
+          <div class="input-group">
+            <label>Reps</label>
+            <input type="number" id="inp-lift-reps" placeholder="e.g. 5" min="1" max="100">
+          </div>
+        </div>
+        <div class="log-row">
+          <div class="input-group">
+            <label>Date</label>
+            <input type="date" id="inp-lift-date">
+          </div>
+          <div class="input-group">
+            <label>Notes (optional)</label>
+            <input type="text" id="inp-lift-note" placeholder="e.g. paused, belt…">
+          </div>
+        </div>
+        <button class="log-btn" onclick="logLift()">Log Lift</button>
+      </div>
+      <!-- PR / best for selected lift -->
+      <div id="lift-bests" class="bests-grid" style="display:none"></div>
+      <!-- Trend bars -->
+      <div id="lift-trend" class="trend-bar-wrap" style="display:none"></div>
+      <!-- History for selected lift -->
+      <div id="lift-history" class="history-wrap"></div>
+    </div>
+  </div>
+
+  <div style="padding:0 0 8px">
+    <button class="log-btn secondary" style="width:100%;margin-top:4px" onclick="if(confirm('Delete ALL testing data?')){clearTestingData()}">Clear All Testing Data</button>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+<button class="nav-btn active" onclick="switchPage('workout',this)">
+<svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h14" stroke-linecap="round"/></svg>
+Workout
+</button>
+<button class="nav-btn" onclick="switchPage('overview',this)">
+<svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+Overview
+</button>
+<button class="nav-btn" onclick="switchPage('testing',this)">
+<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+Testing
+</button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// WORKOUT DATA
+// ============================================================
+const PROGRAM = {
+1: [
+{title:"Monday", subtitle:"Chest / Triceps + Biceps + Core", tag:"chest", tagClass:"tag-chest",
+sections:[
+{type:"warmup",name:"Warmup — SI Joint & Upper Body",exercises:[
+{n:"Bird Dogs",r:"2×10 each",note:"SI joint stability"},
+{n:"Dead Bugs",r:"2×10 each",note:"Low back into floor"},
+{n:"Band Pull Aparts",r:"2×15",note:"Shoulder health"},
+{n:"Pushup to Downward Dog",r:"2×8",note:""},
+{n:"Band Dislocates",r:"2×10",note:"Shoulder mobility"}]},
+{type:"superset",name:"Superset A — Strength",exercises:[
+{n:"Bench Press",r:"4×8 @ 65-70%",note:"~135-145 lbs"},
+{n:"Band Pull Aparts",r:"4×12",note:"1 count squeeze"}]},
+{type:"superset",name:"Superset B",exercises:[
+{n:"Incline Dumbbell Press",r:"3×10",note:"40X0 tempo"},
+{n:"Dumbbell Row — Single Arm",r:"3×10 each",note:"Full stretch"}]},
+{type:"superset",name:"Superset C",exercises:[
+{n:"Cable Fly",r:"3×12",note:"Squeeze at peak"},
+{n:"EZ Bar Curl",r:"3×12",note:"Biceps #1 — controlled negative"}]},
+{type:"superset",name:"Superset D",exercises:[
+{n:"Rope Pushdowns",r:"3×15",note:"Full lockout"},
+{n:"Dumbbell Hammer Curls",r:"3×12",note:"Biceps #1"}]},
+{type:"core",name:"Core Circuit × 3 Rounds",exercises:[
+{n:"Plank",r:"3×45 sec",note:"Brace hard"},
+{n:"Russian Twists",r:"3×20 total",note:""},
+{n:"Leg Lifts",r:"3×15",note:"Slow negative"}]},
+{type:"cardio",name:"Cardio",exercises:[
+{n:"LISS — Incline Walk or Bike",r:"20 min",note:"HR 135-155"}]},
+{type:"mobility",name:"Cooldown — Knee & Stretching",exercises:[
+{n:"TKE w/ Band",r:"2×15 each",note:"Knee health"},
+{n:"Knee Circles",r:"2×10 each dir",note:""},
+{n:"Chest Stretch",r:"2×30s each",note:""},
+{n:"Lat Stretch",r:"2×30s each",note:""}]}
+]},
+{title:"Tuesday", subtitle:"Lower Body — Squat Focus", tag:"legs", tagClass:"tag-legs",
+sections:[
+{type:"warmup",name:"Warmup — SI Joint & Lower Body",exercises:[
+{n:"Cat-Cow Stretch",r:"2×10",note:"Spinal mobilization"},
+{n:"Bird Dogs",r:"2×10 each",note:"SI joint"},
+{n:"Glute Bridges",r:"2×15",note:"2 sec squeeze"},
+{n:"BW Squats w/ Band Abduction",r:"2×10",note:"Knees out"},
+{n:"Cossack Squats",r:"2×8 each",note:"Hip mobility"}]},
+{type:"superset",name:"Superset A — Strength",exercises:[
+{n:"Back Squat",r:"4×8 @ 60-65%",note:"~150-160 lbs, 3 count lower"},
+{n:"TKE w/ Band",r:"4×12 each",note:"Between sets"}]},
+{type:"superset",name:"Superset B",exercises:[
+{n:"Bulgarian Split Squat (DB)",r:"3×8 each",note:"4 count lower"},
+{n:"Stability Ball Hamstring Curls",r:"3×12",note:"4 count lower"}]},
+{type:"superset",name:"Superset C — 40X0",exercises:[
+{n:"Leg Press",r:"3×12",note:"Full ROM"},
+{n:"Leg Extension",r:"3×12",note:"Controlled"},
+{n:"Standing Calf Raises",r:"3×15",note:"2 sec pause stretched"}]},
+{type:"superset",name:"Superset D",exercises:[
+{n:"Dumbbell Side Lunge",r:"3×8 each",note:"Hip mobility under load"},
+{n:"Seated Calf Raises",r:"3×15",note:"Slow negatives"}]},
+{type:"cardio",name:"Cardio",exercises:[
+{n:"LISS — Walk / Light Jog",r:"20 min",note:"HR 130-150"}]},
+{type:"mobility",name:"Cooldown — Knee & Lower Body",exercises:[
+{n:"TKE w/ Band",r:"2×15 each",note:""},
+{n:"Couch Stretch",r:"2×30s each",note:""},
+{n:"Pigeon Stretch",r:"2×30s each",note:""},
+{n:"Banded Hamstring Stretch",r:"2×30s each",note:""}]}
+]},
+{title:"Wednesday", subtitle:"Core + Arms + HIIT", tag:"core", tagClass:"tag-core",
+sections:[
+{type:"warmup",name:"Warmup — Back/Pelvis Mobility",exercises:[
+{n:"Cat-Cow Stretch",r:"2×10",note:""},
+{n:"Thread the Needle",r:"2×8 each",note:"Thoracic rotation — SI help"},
+{n:"Child's Pose to Cobra",r:"2×8",note:"Spinal flex/ext"},
+{n:"Hip Circles (Quadruped)",r:"2×10 each",note:""},
+{n:"Dead Bugs",r:"2×10 each",note:"Core activation"}]},
+{type:"core",name:"Core Superset A × 3",exercises:[
+{n:"Weighted Plank",r:"3×45 sec",note:"Plate on back"},
+{n:"Rotational Side Plank",r:"3×10 each",note:""},
+{n:"Leg Lifts",r:"3×20",note:"Back pinned to floor"}]},
+{type:"core",name:"Core Superset B × 3",exercises:[
+{n:"Cable Woodchops",r:"3×12 each",note:"Anti-rotation"},
+{n:"Ab Wheel Rollouts",r:"3×10",note:"Great for SI"},
+{n:"Pallof Press",r:"3×10 each",note:"Anti-rotation"}]},
+{type:"superset",name:"Superset C — Biceps + Triceps (41X1)",exercises:[
+{n:"Barbell Curls",r:"3×10",note:"Biceps #2 — strict"},
+{n:"Barbell Skull Crushers",r:"3×10",note:"Controlled negative"}]},
+{type:"superset",name:"Superset D",exercises:[
+{n:"Incline Dumbbell Curls",r:"3×12",note:"Biceps #2 — full stretch"},
+{n:"OH Rope Tricep Extension",r:"3×12",note:""}]},
+{type:"superset",name:"Superset E — Drop Sets",exercises:[
+{n:"Cable Curl",r:"3×30 (10/10/10)",note:"Biceps #2 finisher"},
+{n:"Rope Pushdowns",r:"3×30 (10/10/10)",note:""}]},
+{type:"cardio",name:"HIIT Cardio",exercises:[
+{n:"1 min ON / 1 min OFF × 10",r:"20 min",note:"Row, Bike, Jump Rope, Battle Rope, Burpees"}]},
+{type:"mobility",name:"Cooldown — SI Joint & Knee",exercises:[
+{n:"Knee Circles",r:"2×10 each dir",note:""},
+{n:"Banded Cross Body Stretch",r:"2×30s each",note:"SI/glute relief"},
+{n:"Glute Stretch (Figure 4)",r:"2×30s each",note:"Extra on right side"},
+{n:"Pancake Stretch",r:"2×30s",note:""}]}
+]},
+{title:"Thursday", subtitle:"Upper Pull/Push + Biceps", tag:"pull", tagClass:"tag-pull",
+sections:[
+{type:"warmup",name:"Warmup — SI Joint & Upper Body",exercises:[
+{n:"Bird Dogs",r:"2×10 each",note:"SI joint"},
+{n:"Band Dislocates",r:"2×10",note:""},
+{n:"Ring Rows",r:"2×12",note:"Activation"},
+{n:"Behind Neck Press (empty bar)",r:"2×10",note:""},
+{n:"Clapping Pushups",r:"2×5",note:"CNS activation"}]},
+{type:"superset",name:"Superset A — Strength",exercises:[
+{n:"Pull Ups (or Chin Ups)",r:"4×8",note:"Add weight if easy"},
+{n:"Overhead Press (BB)",r:"4×8",note:"Strict"}]},
+{type:"superset",name:"Superset B",exercises:[
+{n:"Bent Over Barbell Row",r:"3×10",note:"No excessive swing"},
+{n:"Dips",r:"3×10",note:"Add weight if needed"}]},
+{type:"superset",name:"Giant Set C",exercises:[
+{n:"Lat Pulldown (Wide)",r:"3×12",note:"Full stretch at top"},
+{n:"Machine Shoulder Press",r:"3×12",note:""},
+{n:"Face Pulls",r:"3×15",note:"3 sec hold — posture"},
+{n:"Straight Arm Pulldown",r:"3×12",note:""}]},
+{type:"superset",name:"Superset D — Biceps",exercises:[
+{n:"Seated DB Preacher Curl",r:"3×10",note:"Biceps #3 — strict"},
+{n:"Alt. DB Hammer Curl",r:"3×10 each",note:"Biceps #3"}]},
+{type:"cardio",name:"Cardio",exercises:[
+{n:"Interval — Bike or Row",r:"20 min",note:"10× 30s hard / 1 min easy"}]},
+{type:"mobility",name:"Cooldown — Knee & Upper Body",exercises:[
+{n:"TKE w/ Band",r:"2×15 each",note:""},
+{n:"Bench Dip Hold Stretch",r:"2×30s",note:""},
+{n:"Band OH Mobility",r:"2×30s each",note:""},
+{n:"Shoulder Stretch",r:"2×30s each",note:""}]}
+]},
+{title:"Friday", subtitle:"Lower Body — Deadlift Focus + Core", tag:"dead", tagClass:"tag-dead",
+sections:[
+{type:"warmup",name:"Warmup — SI Joint & Hips",exercises:[
+{n:"Cat-Cow Stretch",r:"2×10",note:""},
+{n:"Dead Bugs",r:"2×10 each",note:"Core bracing"},
+{n:"Glute Bridges",r:"2×15",note:"Glute activation"},
+{n:"Band Lateral Walks",r:"2×10 each",note:""},
+{n:"Light KB Swings",r:"2×10",note:"Hip hinge warmup"}]},
+{type:"superset",name:"Superset A — Strength",exercises:[
+{n:"Deadlift",r:"4×6 @ 65-70%",note:"~145-160 lbs — PERFECT form"}]},
+{type:"superset",name:"Superset B",exercises:[
+{n:"DB Romanian Deadlift",r:"3×10",note:"4 count lower"},
+{n:"Walking DB Lunges",r:"3×10 each",note:""}]},
+{type:"superset",name:"Superset C",exercises:[
+{n:"Hack Squat",r:"3×12",note:"Quad focus, easy on spine"},
+{n:"Lying Hamstring Curls",r:"3×12",note:""}]},
+{type:"superset",name:"Superset D",exercises:[
+{n:"Reverse Hyper (or Back Ext.)",r:"3×12",note:"SI friendly"},
+{n:"Single Leg Calf Raise",r:"3×12 each",note:""}]},
+{type:"core",name:"Core Circuit × 3",exercises:[
+{n:"Pallof Press",r:"3×10 each",note:"Anti-rotation — SI stability"},
+{n:"Side Plank",r:"3×30s each",note:"Focus right side"},
+{n:"Cable Crunches",r:"3×15",note:""}]},
+{type:"cardio",name:"Cardio",exercises:[
+{n:"LISS — Walk or Easy Bike",r:"20 min",note:"HR 130-145 — recovery"}]},
+{type:"mobility",name:"Cooldown — SI Joint & Lower Body",exercises:[
+{n:"Knee Circles",r:"2×10 each dir",note:""},
+{n:"Banded Hamstring Stretch",r:"2×30s each",note:""},
+{n:"Banded Adductor Stretch",r:"2×30s each",note:""},
+{n:"Glute Stretch",r:"2×30s each",note:"Extra right side"},
+{n:"Banded Quad Stretch",r:"2×30s each",note:""}]}
+]},
+{title:"Saturday", subtitle:"Shoulders + Arms + Core + Long LISS", tag:"shoulder", tagClass:"tag-shoulder",
+sections:[
+{type:"warmup",name:"Warmup — Full Body",exercises:[
+{n:"Bird Dogs",r:"2×10 each",note:"SI joint"},
+{n:"Band Pull Aparts",r:"2×15",note:""},
+{n:"YTW on Rings/Floor",r:"2×5 each",note:"Rotator cuff"},
+{n:"Med Ball Slams",r:"2×8",note:""},
+{n:"Dead Bugs",r:"2×10 each",note:""}]},
+{type:"core",name:"Core Superset A × 3",exercises:[
+{n:"Med Ball Side Toss",r:"3×10 each",note:"Explosive"},
+{n:"Ab Wheel Rollouts",r:"3×12",note:""},
+{n:"Decline Sit-ups",r:"3×15",note:"Weighted if possible"}]},
+{type:"superset",name:"Superset B — Shoulders",exercises:[
+{n:"Seated Behind Neck Press (Smith)",r:"3×10",note:"No back rest"},
+{n:"DB Upright Row — Single Arm",r:"3×10 each",note:""}]},
+{type:"superset",name:"Superset C — Shoulders",exercises:[
+{n:"DB OH Press — Single Arm",r:"3×10 each",note:""},
+{n:"Incline Rear Delt Raise",r:"3×12",note:""},
+{n:"Lateral Raise",r:"3×15",note:""}]},
+{type:"superset",name:"Superset D — Biceps + Triceps",exercises:[
+{n:"EZ Bar Cable Curl",r:"3×12",note:"Biceps #3"},
+{n:"DB Skull Crushers",r:"3×12",note:""}]},
+{type:"superset",name:"Superset E — Biceps + Triceps",exercises:[
+{n:"Rope Hammer Curl",r:"3×12",note:"Biceps #3"},
+{n:"OH Rope Tricep Extension",r:"3×12",note:""}]},
+{type:"cardio",name:"LISS — Long Session",exercises:[
+{n:"45-60 min LISS Cardio",r:"HR 140-160",note:"Walk, bike, elliptical, or jog"},
+{n:"",r:"",note:"Half marathon base building"}]},
+{type:"mobility",name:"Cooldown — Full Body Mobility",exercises:[
+{n:"TKE w/ Band",r:"2×15 each",note:""},
+{n:"Knee Circles",r:"2×10 each dir",note:""},
+{n:"Couch Stretch",r:"2×30s each",note:""},
+{n:"Pigeon Stretch",r:"2×30s each",note:""},
+{n:"Chest Stretch",r:"2×30s each",note:""},
+{n:"Lat Stretch",r:"2×30s each",note:""},
+{n:"Banded Cross Body Stretch",r:"2×30s each",note:"SI joint"}]}
+]}
+],
+2: [
+{title:"Monday",subtitle:"Chest / Triceps + Biceps + Core",tag:"chest",tagClass:"tag-chest",sections:[
+{type:"warmup",name:"Warmup",exercises:[{n:"Bird Dogs",r:"2×10 each",note:""},{n:"Dead Bugs",r:"2×10 each",note:""},{n:"Band Pull Aparts",r:"2×15",note:""},{n:"Pushup to Downward Dog",r:"2×8",note:""},{n:"Band Dislocates",r:"2×10",note:""}]},
+{type:"superset",name:"Superset A — Strength",exercises:[{n:"Bench Press",r:"4×6 @ 70-75%",note:"~150-160 lbs"},{n:"Band Pull Aparts",r:"4×12",note:""}]},
+{type:"superset",name:"Superset B",exercises:[{n:"Incline DB Press",r:"3×10",note:"Increase weight"},{n:"Wide Pronated Seated Row",r:"3×10",note:"40X0"}]},
+{type:"superset",name:"Superset C",exercises:[{n:"Machine Decline Chest Press",r:"3×10",note:"40X0"},{n:"EZ Bar Curl",r:"3×10",note:"Biceps #1 — heavier"}]},
+{type:"superset",name:"Superset D",exercises:[{n:"Rope Pushdowns",r:"3×12",note:""},{n:"Alt. DB Hammer Curls",r:"3×10 each",note:"Biceps #1"}]},
+{type:"core",name:"Core Circuit × 3",exercises:[{n:"Weighted Plank",r:"3×1 min",note:""},{n:"Russian Twists",r:"3×20",note:"Heavier"},{n:"Toes to Bar / Leg Lifts",r:"3×12",note:""}]},
+{type:"cardio",name:"Cardio",exercises:[{n:"LISS — Incline Walk or Bike",r:"20 min",note:"HR 140-155"}]},
+{type:"mobility",name:"Cooldown",exercises:[{n:"TKE w/ Band",r:"2×15 each",note:""},{n:"Knee Circles",r:"2×10 each dir",note:""},{n:"Chest Stretch",r:"2×30s each",note:""},{n:"Lat Stretch",r:"2×30s each",note:""}]}]},
+{title:"Tuesday",subtitle:"Lower Body — Squat Focus",tag:"legs",tagClass:"tag-legs",sections:[
+{type:"warmup",name:"Warmup",exercises:[{n:"Cat-Cow",r:"2×10",note:""},{n:"Bird Dogs",r:"2×10 each",note:""},{n:"Glute Bridges",r:"2×15",note:""},{n:"Squats w/ Band",r:"2×10",note:"3 ct lower"},{n:"Groin Plate Slides",r:"2×10",note:""}]},
+{type:"superset",name:"Superset A — Strength",exercises:[{n:"Back Squat",r:"4×6 @ 65-70%",note:"~160-170 lbs"},{n:"TKE w/ Band",r:"4×12 each",note:""}]},
+{type:"superset",name:"Superset B",exercises:[{n:"Bulgarian Split Squat (DB)",r:"3×8 each",note:"Heavier"},{n:"SB Hamstring Curls",r:"3×10",note:"4 ct lower"}]},
+{type:"superset",name:"Superset C — 40X0",exercises:[{n:"Leg Press",r:"3×10",note:"Increase wt"},{n:"Leg Extension",r:"3×12",note:""},{n:"Standing Calf Raises",r:"3×16",note:"6 slow + 10 normal"}]},
+{type:"superset",name:"Superset D",exercises:[{n:"DB Side Lunge",r:"3×8 each",note:""},{n:"Seated Calf Raises",r:"3×16",note:"6 slow + 10 normal"}]},
+{type:"cardio",name:"Cardio",exercises:[{n:"LISS — Walk/Easy Jog",r:"20 min",note:"HR 130-150"}]},
+{type:"mobility",name:"Cooldown",exercises:[{n:"TKE w/ Band",r:"2×15 each",note:""},{n:"Couch Stretch",r:"2×30s each",note:""},{n:"Pigeon Stretch",r:"2×30s each",note:""},{n:"Banded Hamstring Stretch",r:"2×30s each",note:""}]}]},
+{title:"Wednesday",subtitle:"Core + Arms + HIIT",tag:"core",tagClass:"tag-core",sections:[
+{type:"warmup",name:"Warmup — Back/Pelvis",exercises:[{n:"Cat-Cow",r:"2×10",note:""},{n:"Thread the Needle",r:"2×8 each",note:""},{n:"90/90 Hip Switch",r:"2×8 each",note:"SI mobility"},{n:"Hip Circles",r:"2×10 each",note:""},{n:"Dead Bugs",r:"2×10 each",note:""}]},
+{type:"core",name:"Core Superset A × 3",exercises:[{n:"Weighted Plank",r:"3×1 min",note:""},{n:"Med Ball Side Toss",r:"3×10 each",note:""},{n:"Strict Toes to Bar",r:"3×10",note:""}]},
+{type:"core",name:"Core Superset B × 3",exercises:[{n:"V-Up Pushes",r:"3×10",note:""},{n:"Band Resisted Plank Pulls",r:"3×10 each",note:""},{n:"Sit Up to Ball Toss",r:"3×10",note:""}]},
+{type:"superset",name:"Superset C — 41X1 Tempo",exercises:[{n:"Barbell Curls",r:"3×8 +2 ext",note:"Biceps #2 — extend set"},{n:"BB Skull Crushers",r:"3×8 +2 ext",note:"41X1"}]},
+{type:"superset",name:"Superset D",exercises:[{n:"Seated DB French Press",r:"3×10",note:""},{n:"EZ Bar Reverse Curl",r:"3×10",note:""}]},
+{type:"superset",name:"Superset E — Drop Sets",exercises:[{n:"EZ Cable Concentration Curl",r:"3×30 drop",note:"Biceps #2 finisher"},{n:"Rope Pushdowns",r:"3×30 drop",note:""}]},
+{type:"cardio",name:"HIIT",exercises:[{n:"1 min ON / 1 min OFF × 10",r:"20 min",note:"Pick 5 movements"}]},
+{type:"mobility",name:"Cooldown",exercises:[{n:"Knee Circles",r:"2×10 each dir",note:""},{n:"Banded Cross Body",r:"2×30s each",note:""},{n:"Glute Stretch",r:"2×30s each",note:"Right side"},{n:"Pancake Stretch",r:"2×30s",note:""}]}]},
+{title:"Thursday",subtitle:"Upper Pull/Push + Biceps",tag:"pull",tagClass:"tag-pull",sections:[
+{type:"warmup",name:"Warmup",exercises:[{n:"Bird Dogs",r:"2×10 each",note:""},{n:"Band Dislocates",r:"2×10",note:""},{n:"Ring Rows",r:"2×12",note:""},{n:"Behind Neck Press (empty)",r:"2×10",note:""},{n:"Clapping Pushups",r:"2×5",note:""}]},
+{type:"superset",name:"Superset A — Strength",exercises:[{n:"Chin Ups (Neutral Grip)",r:"4×6",note:"2 ct pause / 3 ct lower"},{n:"Incline Bench Press",r:"4×8",note:"Increase from W1"}]},
+{type:"superset",name:"Superset B",exercises:[{n:"DB Wide Row",r:"4×10",note:""},{n:"Face Pulls",r:"4×12",note:"3 ct pause"}]},
+{type:"superset",name:"Giant Set C",exercises:[{n:"Reverse Key Press",r:"3×12",note:""},{n:"Seated Cable Row",r:"3×12",note:""},{n:"Machine Pec Fly",r:"3×12",note:""},{n:"Straight Arm Pulldown",r:"3×12",note:""}]},
+{type:"superset",name:"Superset D — Biceps",exercises:[{n:"DB Spider Curls",r:"3×12",note:"Biceps #3"},{n:"Cali Press",r:"3×12",note:""}]},
+{type:"cardio",name:"Cardio",exercises:[{n:"110 Yard Sprints",r:"10 reps",note:"1 min rest"}]},
+{type:"mobility",name:"Cooldown",exercises:[{n:"TKE w/ Band",r:"2×15 each",note:""},{n:"Bench Dip Hold",r:"2×30s",note:""},{n:"Band OH Mobility",r:"2×30s each",note:""},{n:"Broomstick OH Stretch",r:"2×30s",note:""}]}]},
+{title:"Friday",subtitle:"Lower Body — Deadlift + Core",tag:"dead",tagClass:"tag-dead",sections:[
+{type:"warmup",name:"Warmup — SI Joint & Hips",exercises:[{n:"Cat-Cow",r:"2×10",note:""},{n:"Dead Bugs",r:"2×10 each",note:""},{n:"SL Glute Bridges",r:"2×10 each",note:"Progression"},{n:"Band Lateral Walks",r:"2×10 each",note:""},{n:"Light KB Swings",r:"2×10",note:""}]},
+{type:"superset",name:"Superset A — Strength",exercises:[{n:"Deadlift",r:"4×6 @ 70-75%",note:"~160-170 lbs"}]},
+{type:"superset",name:"Superset B",exercises:[{n:"DB Romanian Deadlift",r:"3×10",note:"4 ct lower"},{n:"Walking DB Lunges",r:"3×10 each",note:""}]},
+{type:"superset",name:"Superset C",exercises:[{n:"Hack Squat",r:"3×10",note:"Increase wt"},{n:"Lying Hamstring Curls",r:"3×10",note:""}]},
+{type:"superset",name:"Superset D",exercises:[{n:"Glute Ham Raise",r:"3×8",note:"6 ct lower"},{n:"SL Calf Raise",r:"3×12 each",note:""}]},
+{type:"core",name:"Core Circuit × 3",exercises:[{n:"Pallof Press",r:"3×10 each",note:""},{n:"Side Plank w/ Hip Dip",r:"3×10 each",note:"SI stability"},{n:"Reverse Crunch",r:"3×15",note:""}]},
+{type:"cardio",name:"Cardio",exercises:[{n:"LISS — Walk or Bike",r:"20 min",note:"HR 130-145"}]},
+{type:"mobility",name:"Cooldown",exercises:[{n:"Knee Circles",r:"2×10 each dir",note:""},{n:"Banded Hamstring Stretch",r:"2×30s each",note:""},{n:"Banded Adductor Stretch",r:"2×30s each",note:""},{n:"Glute Stretch",r:"2×30s each",note:"Right side"},{n:"Banded Quad Stretch",r:"2×30s each",note:""}]}]},
+{title:"Saturday",subtitle:"Shoulders + Arms + Core + Long LISS",tag:"shoulder",tagClass:"tag-shoulder",sections:[
+{type:"warmup",name:"Warmup",exercises:[{n:"Bird Dogs",r:"2×10 each",note:""},{n:"Band Pull Aparts",r:"2×15",note:""},{n:"YTW on Rings",r:"2×5 each",note:""},{n:"Med Ball Slams",r:"2×8",note:""},{n:"Dead Bugs",r:"2×10 each",note:""}]},
+{type:"core",name:"Core Superset A × 3",exercises:[{n:"Bear Crawl Rollouts",r:"3×12",note:""},{n:"Vertical Toes to Bar",r:"3×10",note:""},{n:"Seated Med Ball Toss",r:"3×10",note:""}]},
+{type:"superset",name:"Superset B — Shoulders",exercises:[{n:"Push Press — 4 ct Lower",r:"3×8",note:"Eccentric focus"},{n:"Band Pull Aparts",r:"3×12",note:""}]},
+{type:"superset",name:"Superset C",exercises:[{n:"DB OH Press — Single Arm",r:"3×10 each",note:""},{n:"Incline Rear Delt Raise",r:"3×12",note:""},{n:"Seated Lateral Raise",r:"3×15",note:""}]},
+{type:"superset",name:"Superset D — Arms",exercises:[{n:"Seated DB Preacher Curl",r:"3×12",note:"Biceps #3"},{n:"DB OH Tricep Ext — Single Arm",r:"3×12 each",note:""}]},
+{type:"superset",name:"Superset E — Arms",exercises:[{n:"Alt. DB Hammer Curls",r:"3×10 each",note:"Biceps #3"},{n:"Cali Press",r:"3×10",note:""}]},
+{type:"cardio",name:"LISS — Long Session",exercises:[{n:"45-60 min LISS Cardio",r:"HR 140-160",note:"Half marathon base"}]},
+{type:"mobility",name:"Cooldown — Full Body",exercises:[{n:"TKE w/ Band",r:"2×15 each",note:""},{n:"Knee Circles",r:"2×10 each dir",note:""},{n:"Couch Stretch",r:"2×30s each",note:""},{n:"Pigeon Stretch",r:"2×30s each",note:""},{n:"Chest Stretch",r:"2×30s each",note:""},{n:"Lat Stretch",r:"2×30s each",note:""},{n:"Banded Cross Body",r:"2×30s each",note:"SI joint"}]}]}
+],
+3: [
+{title:"Monday",subtitle:"Chest / Triceps + Biceps + Core — PEAK",tag:"chest",tagClass:"tag-chest",sections:[
+{type:"warmup",name:"Warmup",exercises:[{n:"Bird Dogs",r:"2×10 each",note:""},{n:"Dead Bugs",r:"2×10 each",note:""},{n:"Band Pull Aparts",r:"2×15",note:""},{n:"Pushup to Downward Dog",r:"2×8",note:""},{n:"Band Dislocates",r:"2×10",note:""}]},
+{type:"superset",name:"Superset A — Strength",exercises:[{n:"Bench Press",r:"5×5 @ 75-80%",note:"~160-170 lbs — peak week"},{n:"Band Pull Aparts",r:"5×10",note:""}]},
+{type:"superset",name:"Superset B — 40X0",exercises:[{n:"Incline DB Narrow Press",r:"3×8",note:"Heavier"},{n:"Wide Pronated Seated Row",r:"3×8",note:"40X0"}]},
+{type:"superset",name:"Superset C",exercises:[{n:"Machine Decline Chest Press",r:"3×8",note:"40X0"},{n:"EZ Bar Curl",r:"3×8",note:"Biceps #1 — heavier"}]},
+{type:"superset",name:"Superset D",exercises:[{n:"DB Skull Crushers",r:"3×10",note:""},{n:"Incline DB Curls",r:"3×10",note:"Biceps #1 — full stretch"}]},
+{type:"core",name:"Core Circuit × 3",exercises:[{n:"Weighted Plank",r:"3×1 min",note:"Heavier plate"},{n:"Cable Woodchops",r:"3×12 each",note:""},{n:"Hanging Leg Lifts",r:"3×12",note:"Progression"}]},
+{type:"cardio",name:"Cardio",exercises:[{n:"LISS",r:"20 min",note:"HR 140-160"}]},
+{type:"mobility",name:"Cooldown",exercises:[{n:"TKE w/ Band",r:"2×15 each",note:""},{n:"Knee Circles",r:"2×10 each dir",note:""},{n:"Chest Stretch",r:"2×30s each",note:""},{n:"Lat Stretch",r:"2×30s each",note:""}]}]},
+{title:"Tuesday",subtitle:"Lower Body — Squat PEAK",tag:"legs",tagClass:"tag-legs",sections:[
+{type:"warmup",name:"Warmup",exercises:[{n:"Cat-Cow",r:"2×10",note:""},{n:"Bird Dogs",r:"2×10 each",note:""},{n:"SL Glute Bridges",r:"2×10 each",note:""},{n:"Squats w/ Band",r:"2×10",note:"3 ct lower"},{n:"Cossack Squats",r:"2×8 each",note:""}]},
+{type:"superset",name:"Superset A — Strength",exercises:[{n:"Back Squat",r:"5×5 @ 70-75%",note:"~170-185 lbs — push it"},{n:"TKE w/ Band",r:"5×12 each",note:""}]},
+{type:"superset",name:"Superset B",exercises:[{n:"Bulgarian Split Squat (DB)",r:"3×6 each",note:"Heavier — 4 ct"},{n:"SB Hamstring Curls",r:"3×10",note:"4 ct lower"}]},
+{type:"superset",name:"Superset C",exercises:[{n:"Close Stance Squat (Smith)",r:"3×10",note:"Quad focus"},{n:"Leg Extension",r:"3×10",note:""},{n:"Standing Calf Raises",r:"3×16",note:"6 slow + 10 normal"}]},
+{type:"superset",name:"Superset D",exercises:[{n:"Step Ups — Front Rack",r:"3×6 each",note:"Unilateral"},{n:"Seated Calf Raises",r:"3×16",note:"6 slow + 10 normal"}]},
+{type:"cardio",name:"Cardio",exercises:[{n:"LISS",r:"20 min",note:"HR 130-150"}]},
+{type:"mobility",name:"Cooldown",exercises:[{n:"TKE w/ Band",r:"2×15 each",note:""},{n:"Couch Stretch",r:"2×30s each",note:""},{n:"Pigeon Stretch",r:"2×30s each",note:""},{n:"Pancake Stretch",r:"2×30s",note:""}]}]},
+{title:"Wednesday",subtitle:"Core + Arms + HIIT — PEAK",tag:"core",tagClass:"tag-core",sections:[
+{type:"warmup",name:"Warmup",exercises:[{n:"Cat-Cow",r:"2×10",note:""},{n:"Thread the Needle",r:"2×8 each",note:""},{n:"90/90 Hip Switch",r:"2×8 each",note:""},{n:"Hip Circles",r:"2×10 each",note:""},{n:"Dead Bugs",r:"2×10 each",note:""}]},
+{type:"core",name:"Core A × 3",exercises:[{n:"SL Med Ball Slams",r:"3×10 each",note:"Progression"},{n:"Bear Crawl Rollouts",r:"3×10 each",note:""},{n:"Side Plank Band Pulls",r:"3×10 each",note:""}]},
+{type:"core",name:"Core B × 3",exercises:[{n:"V-Up Pushes",r:"3×10",note:""},{n:"Band Resisted Plank Pulls",r:"3×10 each",note:""},{n:"Sit Up to Ball Toss",r:"3×10",note:""}]},
+{type:"superset",name:"Superset C — 41X1 + Extend",exercises:[{n:"BB Curls",r:"3×8 +2 ext",note:"Biceps #2"},{n:"BB Skull Crushers",r:"3×8 +2 ext",note:"41X1"}]},
+{type:"superset",name:"Superset D — 41X1 + Extend",exercises:[{n:"Seated DB French Press",r:"3×8 +2 ext",note:""},{n:"EZ Bar Reverse Curl",r:"3×8 +2 ext",note:""}]},
+{type:"superset",name:"Superset E — Drops",exercises:[{n:"EZ Cable Concentration Curl",r:"3×30 drop",note:"Biceps #2 finisher"},{n:"Rope Pushdowns",r:"3×30 drop",note:""}]},
+{type:"cardio",name:"HIIT",exercises:[{n:"1 min ON / 1 min OFF × 12",r:"24 min",note:"Increase from W2"}]},
+{type:"mobility",name:"Cooldown",exercises:[{n:"Knee Circles",r:"2×10 each dir",note:""},{n:"Banded Cross Body",r:"2×30s each",note:""},{n:"Glute Stretch",r:"2×30s each",note:"Right side"},{n:"Pancake Stretch",r:"2×30s",note:""}]}]},
+{title:"Thursday",subtitle:"Upper Pull/Push + Biceps — PEAK",tag:"pull",tagClass:"tag-pull",sections:[
+{type:"warmup",name:"Warmup",exercises:[{n:"Bird Dogs",r:"2×10 each",note:""},{n:"Band Dislocates",r:"2×10",note:""},{n:"Ring Rows",r:"2×12",note:""},{n:"Behind Neck Press (empty)",r:"2×10",note:""},{n:"Clapping Pushups",r:"2×5",note:""}]},
+{type:"superset",name:"Superset A — Strength",exercises:[{n:"Pull Ups (Weighted)",r:"4×6",note:"Add weight"},{n:"Incline Bench Press",r:"4×6",note:"Heavier than W2"}]},
+{type:"superset",name:"Superset B",exercises:[{n:"DB Wide Row — Single Arm",r:"4×8",note:""},{n:"Dips (Weighted)",r:"4×8",note:""}]},
+{type:"superset",name:"Giant Set C",exercises:[{n:"Reverse Key Press",r:"3×10",note:""},{n:"Seated Cable Row",r:"3×10",note:""},{n:"Machine Pec Fly",r:"3×10",note:""},{n:"Straight Arm Pulldown",r:"3×10",note:""}]},
+{type:"superset",name:"Superset D — Biceps",exercises:[{n:"SA DB Preacher Curl",r:"3×10 each",note:"Biceps #3"},{n:"Alt. DB Hammer Curls",r:"3×10 each",note:"Biceps #3"}]},
+{type:"cardio",name:"Cardio",exercises:[{n:"110 Yard Sprints",r:"12 reps",note:"Up from W2"}]},
+{type:"mobility",name:"Cooldown",exercises:[{n:"TKE w/ Band",r:"2×15 each",note:""},{n:"Bench Dip Hold",r:"2×30s",note:""},{n:"Chest Stretch",r:"2×30s each",note:""},{n:"OH Stretch",r:"2×1 min",note:""}]}]},
+{title:"Friday",subtitle:"Lower Body — Deadlift PEAK + Core",tag:"dead",tagClass:"tag-dead",sections:[
+{type:"warmup",name:"Warmup",exercises:[{n:"Cat-Cow",r:"2×10",note:""},{n:"Dead Bugs",r:"2×10 each",note:""},{n:"SL Glute Bridges",r:"2×10 each",note:""},{n:"Band Lateral Walks",r:"2×10 each",note:""},{n:"Light KB Swings",r:"2×10",note:""}]},
+{type:"superset",name:"Superset A — Strength",exercises:[{n:"Deadlift",r:"5×4 @ 75-80%",note:"~170-180 lbs — heavier, fewer reps"}]},
+{type:"superset",name:"Superset B",exercises:[{n:"Sumo Deadlift (lighter)",r:"3×8",note:"Different angle for SI"},{n:"Walking DB Lunges",r:"3×10 each",note:""}]},
+{type:"superset",name:"Superset C",exercises:[{n:"Hack Squat",r:"3×10",note:""},{n:"Lying Hamstring Curls",r:"3×10",note:""}]},
+{type:"superset",name:"Superset D",exercises:[{n:"Glute Ham Raise — 6 ct",r:"3×6",note:"Eccentric"},{n:"Reverse Hyper",r:"3×12",note:"SI friendly"}]},
+{type:"core",name:"Core Circuit × 3",exercises:[{n:"Pallof Press",r:"3×10 each",note:""},{n:"Side Plank w/ Hip Dip",r:"3×10 each",note:""},{n:"Cable Crunches",r:"3×15",note:""}]},
+{type:"cardio",name:"Cardio",exercises:[{n:"LISS",r:"20 min",note:"HR 130-145"}]},
+{type:"mobility",name:"Cooldown",exercises:[{n:"Knee Circles",r:"2×10 each dir",note:""},{n:"Banded Hamstring Stretch",r:"2×30s each",note:""},{n:"Banded Adductor Stretch",r:"2×30s each",note:""},{n:"Glute Stretch",r:"2×30s each",note:"Right side"},{n:"Banded Quad Stretch",r:"2×30s each",note:""}]}]},
+{title:"Saturday",subtitle:"Shoulders + Arms + Core + Long LISS — PEAK",tag:"shoulder",tagClass:"tag-shoulder",sections:[
+{type:"warmup",name:"Warmup",exercises:[{n:"Bird Dogs",r:"2×10 each",note:""},{n:"Band Pull Aparts",r:"2×15",note:""},{n:"YTW on Rings",r:"2×5 each",note:""},{n:"Med Ball Slams",r:"2×8",note:""},{n:"Dead Bugs",r:"2×10 each",note:""}]},
+{type:"core",name:"Core A × 3",exercises:[{n:"SB Reverse V-Ups",r:"3×15",note:""},{n:"Extended Plank on TRX",r:"3×10",note:""},{n:"Russian Twist",r:"3×20 each",note:""}]},
+{type:"superset",name:"Superset B",exercises:[{n:"Push Press — 4 ct Lower",r:"4×6",note:"Heavier"},{n:"Band Pull Aparts",r:"4×12",note:""}]},
+{type:"superset",name:"Superset C",exercises:[{n:"MR NG Seated DB Press",r:"3×8",note:"1¼ — 3 ct ecc"},{n:"Flat Bench W/Y Press",r:"3×10",note:""}]},
+{type:"superset",name:"Superset D — Arms",exercises:[{n:"Rolling DB Tricep Ext",r:"3×10",note:""},{n:"SA DB Preacher Curl",r:"3×10 each",note:"Biceps #3"}]},
+{type:"superset",name:"Superset E — Arms",exercises:[{n:"Double Barrel Tri Pressdown",r:"3×10",note:""},{n:"Incline DB Curls",r:"3×10",note:"Biceps #3"}]},
+{type:"cardio",name:"LISS — Long Session",exercises:[{n:"45-60 min LISS",r:"HR 140-160",note:"Push toward 60 min"}]},
+{type:"mobility",name:"Cooldown — Full Body",exercises:[{n:"TKE w/ Band",r:"2×15 each",note:""},{n:"Knee Circles",r:"2×10 each dir",note:""},{n:"Lat Stretch",r:"2×30s each",note:""},{n:"Chest Stretch",r:"2×30s each",note:""},{n:"Shoulder Stretch",r:"2×30s each",note:""},{n:"Couch Stretch",r:"2×30s each",note:""},{n:"Banded Cross Body",r:"2×30s each",note:"SI joint"}]}]}
+],
+4: [
+{title:"Monday",subtitle:"DELOAD — Chest / Tri + Bi + Core",tag:"chest",tagClass:"tag-chest",sections:[
+{type:"warmup",name:"Warmup",exercises:[{n:"Bird Dogs",r:"2×10 each",note:""},{n:"Dead Bugs",r:"2×10 each",note:""},{n:"Band Pull Aparts",r:"2×15",note:""},{n:"Pushup to Downward Dog",r:"2×8",note:""},{n:"Band Dislocates",r:"2×10",note:""}]},
+{type:"superset",name:"Superset A — DELOAD",exercises:[{n:"Bench Press",r:"3×8 @ 60%",note:"~125 lbs — easy, form focus"},{n:"Band Pull Aparts",r:"3×12",note:""}]},
+{type:"superset",name:"Superset B",exercises:[{n:"Incline DB Press",r:"3×10",note:"Light"},{n:"DB Row",r:"3×10",note:"Light"}]},
+{type:"superset",name:"Superset C",exercises:[{n:"Cable Fly",r:"3×12",note:"Light"},{n:"EZ Bar Curl",r:"3×12",note:"Biceps #1 — light"}]},
+{type:"superset",name:"Superset D",exercises:[{n:"Rope Pushdowns",r:"3×15",note:"Light"},{n:"DB Hammer Curls",r:"3×12",note:"Biceps #1 — light"}]},
+{type:"core",name:"Core × 2 (reduced)",exercises:[{n:"Plank",r:"2×45s",note:""},{n:"Russian Twists",r:"2×20",note:"Light"},{n:"Leg Lifts",r:"2×15",note:""}]},
+{type:"cardio",name:"Cardio",exercises:[{n:"LISS",r:"20 min",note:"HR 130-145 — recovery"}]},
+{type:"mobility",name:"Cooldown — Extended",exercises:[{n:"TKE w/ Band",r:"2×15 each",note:""},{n:"Knee Circles",r:"2×10 each dir",note:""},{n:"Chest Stretch",r:"2×30s each",note:""},{n:"Lat Stretch",r:"2×30s each",note:""},{n:"Shoulder Stretch",r:"2×30s each",note:""}]}]},
+{title:"Tuesday",subtitle:"DELOAD — Lower Body",tag:"legs",tagClass:"tag-legs",sections:[
+{type:"warmup",name:"Warmup",exercises:[{n:"Cat-Cow",r:"2×10",note:""},{n:"Bird Dogs",r:"2×10 each",note:""},{n:"Glute Bridges",r:"2×15",note:""},{n:"BW Squats w/ Band",r:"2×10",note:""},{n:"Cossack Squats",r:"2×8 each",note:""}]},
+{type:"superset",name:"Superset A — DELOAD",exercises:[{n:"Back Squat",r:"3×8 @ 60%",note:"~150 lbs — easy"},{n:"TKE w/ Band",r:"3×12 each",note:""}]},
+{type:"superset",name:"Superset B",exercises:[{n:"Bulgarian Split Squat",r:"3×8 each",note:"Light"},{n:"SB Hamstring Curls",r:"3×10",note:""}]},
+{type:"superset",name:"Superset C",exercises:[{n:"Leg Press",r:"3×12",note:"Light"},{n:"Leg Extension",r:"3×12",note:"Light"},{n:"Standing Calf Raises",r:"3×15",note:""}]},
+{type:"cardio",name:"Cardio",exercises:[{n:"LISS — Easy Walk",r:"20 min",note:"HR 120-140"}]},
+{type:"mobility",name:"Cooldown — Extended Holds",exercises:[{n:"TKE w/ Band",r:"2×15 each",note:""},{n:"Couch Stretch",r:"2×45s each",note:"Extended"},{n:"Pigeon Stretch",r:"2×45s each",note:"Extended"},{n:"Banded Hamstring",r:"2×45s each",note:""},{n:"Pancake Stretch",r:"2×45s",note:""}]}]},
+{title:"Wednesday",subtitle:"DELOAD — Core + Arms + Cardio",tag:"core",tagClass:"tag-core",sections:[
+{type:"warmup",name:"Warmup — Extended Mobility",exercises:[{n:"Cat-Cow",r:"2×10",note:""},{n:"Thread the Needle",r:"2×10 each",note:"Extra volume"},{n:"90/90 Hip Switch",r:"2×10 each",note:""},{n:"Child's Pose to Cobra",r:"2×10",note:""},{n:"Hip Circles",r:"2×10 each",note:""}]},
+{type:"core",name:"Core × 2 (reduced)",exercises:[{n:"Med Ball Slams",r:"2×10",note:"Light"},{n:"Bear Crawl Rollouts",r:"2×10",note:""},{n:"Side Plank",r:"2×30s each",note:""}]},
+{type:"superset",name:"Superset B — Light",exercises:[{n:"BB Curls",r:"3×15",note:"Biceps #2 — very light"},{n:"BB Skull Crushers",r:"3×15",note:"Light"}]},
+{type:"superset",name:"Superset C",exercises:[{n:"Seated DB French Press",r:"3×15",note:"Light"},{n:"EZ Bar Reverse Curl",r:"3×15",note:"Light"}]},
+{type:"superset",name:"Superset D — Drops",exercises:[{n:"Cable Curl",r:"3×30 drop",note:"Biceps #2 — pump"},{n:"Rope Pushdowns",r:"3×30 drop",note:""}]},
+{type:"cardio",name:"Cardio — Reduced",exercises:[{n:"HIIT — 1 min ON/OFF × 8",r:"16 min",note:"Reduced from W3"}]},
+{type:"mobility",name:"Cooldown — Extended SI Focus",exercises:[{n:"Knee Circles",r:"2×10 each dir",note:""},{n:"Banded Cross Body",r:"2×45s each",note:"Extended"},{n:"Glute Stretch",r:"2×45s each",note:"Right side"},{n:"Thread the Needle",r:"2×30s each",note:"Bonus"},{n:"Pancake Stretch",r:"2×45s",note:""}]}]},
+{title:"Thursday",subtitle:"DELOAD — Upper Pull/Push + Biceps",tag:"pull",tagClass:"tag-pull",sections:[
+{type:"warmup",name:"Warmup",exercises:[{n:"Bird Dogs",r:"2×10 each",note:""},{n:"Band Dislocates",r:"2×10",note:""},{n:"Ring Rows",r:"2×12",note:""},{n:"Behind Neck Press (empty)",r:"2×10",note:""},{n:"Clapping Pushups",r:"2×5",note:""}]},
+{type:"superset",name:"Superset A — DELOAD",exercises:[{n:"Pull Ups",r:"3×8",note:"BW only"},{n:"Incline Bench Press",r:"3×8",note:"60% effort"}]},
+{type:"superset",name:"Superset B",exercises:[{n:"Bent Over Row",r:"3×10",note:"Light"},{n:"Dips",r:"3×10",note:"BW only"}]},
+{type:"superset",name:"Giant Set C — Light",exercises:[{n:"Reverse Key Press",r:"3×10",note:""},{n:"Seated Cable Row",r:"3×10",note:""},{n:"Machine Pec Fly",r:"3×10",note:""},{n:"Straight Arm Pulldown",r:"3×10",note:""}]},
+{type:"superset",name:"Superset D — Biceps",exercises:[{n:"Seated DB Preacher Curl",r:"3×12",note:"Biceps #3 — light"},{n:"Alt. DB Hammer Curls",r:"3×12",note:"Biceps #3 — light"}]},
+{type:"cardio",name:"Cardio",exercises:[{n:"110 Yard Sprints",r:"8 reps",note:"Reduced"}]},
+{type:"mobility",name:"Cooldown",exercises:[{n:"TKE w/ Band",r:"2×15 each",note:""},{n:"Bench Dip Hold",r:"2×30s",note:""},{n:"Chest Stretch",r:"2×30s each",note:""},{n:"OH Stretch",r:"2×1 min",note:""},{n:"Internal Rotation Stretch",r:"2×30s each",note:""}]}]},
+{title:"Friday",subtitle:"DELOAD — Lower Body + Core",tag:"dead",tagClass:"tag-dead",sections:[
+{type:"warmup",name:"Warmup",exercises:[{n:"Cat-Cow",r:"2×10",note:""},{n:"Dead Bugs",r:"2×10 each",note:""},{n:"Glute Bridges",r:"2×15",note:""},{n:"Band Lateral Walks",r:"2×10 each",note:""},{n:"Light KB Swings",r:"2×10",note:""}]},
+{type:"superset",name:"Superset A — DELOAD",exercises:[{n:"Deadlift",r:"3×6 @ 60%",note:"~135 lbs — perfect form"}]},
+{type:"superset",name:"Superset B",exercises:[{n:"DB Romanian Deadlift",r:"3×10",note:"Light"},{n:"Walking DB Lunges",r:"3×8 each",note:"Light"}]},
+{type:"superset",name:"Superset C",exercises:[{n:"Hack Squat",r:"3×12",note:"Light"},{n:"Lying Hamstring Curls",r:"3×12",note:"Light"}]},
+{type:"superset",name:"Superset D",exercises:[{n:"Reverse Hyper",r:"3×12",note:"Light — SI movement"},{n:"SL Calf Raise",r:"3×12 each",note:""}]},
+{type:"core",name:"Core × 2 (reduced)",exercises:[{n:"Pallof Press",r:"2×10 each",note:""},{n:"Side Plank",r:"2×30s each",note:""},{n:"Cable Crunches",r:"2×15",note:""}]},
+{type:"cardio",name:"Cardio",exercises:[{n:"LISS",r:"20 min",note:"HR 120-140"}]},
+{type:"mobility",name:"Cooldown — Extended",exercises:[{n:"Knee Circles",r:"2×10 each dir",note:""},{n:"Banded Hamstring",r:"2×45s each",note:"Extended"},{n:"Banded Adductor",r:"2×45s each",note:""},{n:"Glute Stretch",r:"2×45s each",note:"Right side"},{n:"Banded Quad Stretch",r:"2×45s each",note:""},{n:"Banded Cross Body",r:"2×45s each",note:"SI joint"}]}]},
+{title:"Saturday",subtitle:"DELOAD — Shoulders + Arms + LISS",tag:"shoulder",tagClass:"tag-shoulder",sections:[
+{type:"warmup",name:"Warmup",exercises:[{n:"Bird Dogs",r:"2×10 each",note:""},{n:"Band Pull Aparts",r:"2×15",note:""},{n:"YTW on Rings",r:"2×5 each",note:""},{n:"Med Ball Slams",r:"2×8",note:""},{n:"Dead Bugs",r:"2×10 each",note:""}]},
+{type:"core",name:"Core × 2 (reduced)",exercises:[{n:"Med Ball Side Toss",r:"2×10 each",note:""},{n:"Ab Wheel Rollouts",r:"2×10",note:""},{n:"Russian Twist",r:"2×20 each",note:""}]},
+{type:"superset",name:"Superset B — Light",exercises:[{n:"Push Press",r:"3×8",note:"Light"},{n:"Band Pull Aparts",r:"3×12",note:""}]},
+{type:"superset",name:"Superset C",exercises:[{n:"DB OH Press — SA",r:"3×10 each",note:"Light"},{n:"Lateral Raise",r:"3×15",note:"Light"},{n:"Rear Delt Raise",r:"3×12",note:"Light"}]},
+{type:"superset",name:"Superset D — Arms",exercises:[{n:"Double Arm DB Curls",r:"3×12",note:"Biceps #3 — light pump"},{n:"DB OH Tricep Ext",r:"3×12",note:"Light"}]},
+{type:"superset",name:"Superset E — Arms",exercises:[{n:"Rope Hammer Curl",r:"3×12",note:"Biceps #3 — light"},{n:"Rope Pushdowns",r:"3×12",note:"Light"}]},
+{type:"cardio",name:"LISS — Long (Reduced)",exercises:[{n:"30-45 min LISS",r:"HR 130-150",note:"Slightly reduced — still base building"}]},
+{type:"mobility",name:"Cooldown — Extended Full Body",exercises:[{n:"TKE w/ Band",r:"2×15 each",note:""},{n:"Knee Circles",r:"2×10 each dir",note:""},{n:"Couch Stretch",r:"2×45s each",note:""},{n:"Pigeon Stretch",r:"2×45s each",note:""},{n:"Chest Stretch",r:"2×45s each",note:""},{n:"Lat Stretch",r:"2×45s each",note:""},{n:"Banded Cross Body",r:"2×45s each",note:""},{n:"Shoulder Stretch",r:"2×45s each",note:""}]}]}
+]
+};
+
+// ============================================================
+// WORKOUT STATE
+// ============================================================
+let currentWeek = 1;
+let currentPage = 'workout';
+const STORAGE_KEY = 'shred_v1';
+
+function loadState(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY))||{}}catch(e){return{}}}
+function saveState(state){localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}
+function getKey(week,day,section,exercise){return `w${week}d${day}s${section}e${exercise}`}
+function isChecked(key){return !!loadState()[key]}
+function toggleCheck(key){
+  const s=loadState();
+  if(s[key])delete s[key];else s[key]=Date.now();
+  saveState(s);
+  updateCheckboxUI(key);
+  renderWeekTabs();
+  renderOverview();
+}
+function updateCheckboxUI(key){
+  const el=document.querySelector(`.ex-check[data-key="${key}"]`);
+  if(el){const checked=isChecked(key);el.classList.toggle('checked',checked);el.closest('.ex-row').classList.toggle('done',checked)}
+  document.querySelectorAll('.day-card').forEach(card=>{
+    let total=0,done=0;
+    card.querySelectorAll('.ex-check').forEach(cb=>{total++;if(cb.classList.contains('checked'))done++});
+    const pct=total?Math.round(done/total*100):0;
+    card.classList.toggle('completed',pct===100);
+    const progSpan=card.querySelector('.day-progress span');if(progSpan)progSpan.textContent=`${done}/${total}`;
+    const ring=card.querySelector('.check-ring');if(ring)ring.classList.toggle('done',pct===100);
+    const fill=card.querySelector('.progress-fill');if(fill)fill.style.width=pct+'%';
+  });
+}
+
+// ============================================================
+// TESTING STATE
+// ============================================================
+const TEST_KEY = 'shred_testing_v1';
+const LIFT_LABELS = {bench:'Bench Press',squat:'Squat',deadlift:'Deadlift',ohp:'OHP',row:'BB Row',other:'Other'};
+let activeLift = 'bench';
+
+function loadTestState(){try{return JSON.parse(localStorage.getItem(TEST_KEY))||{weights:[],lifts:[]}}catch(e){return{weights:[],lifts:[]}}}
+function saveTestState(state){localStorage.setItem(TEST_KEY,JSON.stringify(state))}
+
+function todayStr(){
+  const d=new Date();
+  return d.toISOString().slice(0,10);
+}
+function fmtDate(str){
+  if(!str)return '';
+  const [y,m,d]=str.split('-');
+  return `${m}/${d}/${y.slice(2)}`;
+}
+
+// Weight logging
+function logWeight(){
+  const wEl=document.getElementById('inp-weight');
+  const dEl=document.getElementById('inp-weight-date');
+  const nEl=document.getElementById('inp-weight-note');
+  const w=parseFloat(wEl.value);
+  const d=dEl.value||todayStr();
+  if(!w||w<80||w>500){showToast('Enter a valid weight',false);return;}
+  const state=loadTestState();
+  state.weights.push({w,d,note:nEl.value.trim(),ts:Date.now()});
+  state.weights.sort((a,b)=>a.d.localeCompare(b.d));
+  saveTestState(state);
+  wEl.value='';nEl.value='';dEl.value='';
+  showToast('Weight logged ✓',false);
+  renderWeightPanel();
+  renderOverviewGoals();
+}
+
+function deleteWeight(idx){
+  const state=loadTestState();
+  state.weights.splice(idx,1);
+  saveTestState(state);
+  renderWeightPanel();
+  renderOverviewGoals();
+}
+
+function renderWeightPanel(){
+  const state=loadTestState();
+  const weights=state.weights;
+  const bestsEl=document.getElementById('weight-bests');
+  const trendEl=document.getElementById('weight-trend');
+  const histEl=document.getElementById('weight-history');
+
+  if(!weights.length){
+    bestsEl.style.display='none';trendEl.style.display='none';
+    histEl.innerHTML='<div class="empty-state">No weight entries yet. Log your first!</div>';return;
+  }
+
+  // Bests / current
+  const latest=weights[weights.length-1];
+  const lowest=weights.reduce((a,b)=>b.w<a.w?b:a);
+  bestsEl.style.display='grid';
+  bestsEl.innerHTML=`
+    <div class="best-item"><div class="best-label">Current Weight</div><div class="best-val">${latest.w}<span>lbs</span></div><div class="best-date">${fmtDate(latest.d)}</div></div>
+    <div class="best-item"><div class="best-label">Lowest Logged</div><div class="best-val">${lowest.w}<span>lbs</span></div><div class="best-date">${fmtDate(lowest.d)}</div></div>
+    <div class="best-item"><div class="best-label">To Goal (195)</div><div class="best-val">${Math.max(0,(latest.w-195).toFixed(1))<0?0:(latest.w-195).toFixed(1)}<span>lbs</span></div></div>
+    <div class="best-item"><div class="best-label">Total Lost</div><div class="best-val">${weights.length>1?(weights[0].w-latest.w).toFixed(1):'–'}<span>lbs</span></div></div>`;
+
+  // Trend bars
+  const show=weights.slice(-12);
+  const mn=Math.min(...show.map(e=>e.w));const mx=Math.max(...show.map(e=>e.w));
+  const range=mx-mn||1;
+  trendEl.style.display='flex';
+  trendEl.innerHTML=show.map((e,i)=>{
+    const h=Math.round(8+((mx-e.w)/range)*44);
+    const isLatest=i===show.length-1;
+    return `<div class="trend-bar${isLatest?' latest':''}" style="height:${h}px" data-tip="${e.w}lbs ${fmtDate(e.d)}"></div>`;
+  }).join('');
+
+  // History table
+  const rows=[...weights].reverse().map((e,ri)=>{
+    const realIdx=weights.length-1-ri;
+    const change=realIdx>0?((weights[realIdx].w-weights[realIdx-1].w).toFixed(1)):'–';
+    const chColor=change!=='–'?(parseFloat(change)<0?'var(--accent2)':'var(--red)'):'var(--text3)';
+    return `<tr>
+      <td>${fmtDate(e.d)}</td>
+      <td class="val">${e.w}</td>
+      <td style="font-family:'JetBrains Mono';font-size:11px;color:${chColor}">${change!=='–'?(parseFloat(change)>0?'+':'')+change:'–'}</td>
+      <td style="color:var(--text3);font-size:11px;max-width:80px;overflow:hidden;text-overflow:ellipsis">${e.note||''}</td>
+      <td><button class="delete-entry-btn" onclick="deleteWeight(${realIdx})">✕</button></td>
+    </tr>`;
+  }).join('');
+  histEl.innerHTML=`<table class="history-table">
+    <thead><tr><th>Date</th><th>Weight</th><th>Change</th><th>Notes</th><th></th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+// Lift logging
+function switchLift(el){
+  document.querySelectorAll('.lift-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  activeLift=el.dataset.lift;
+  const nameRow=document.getElementById('lift-name-row');
+  nameRow.style.display=activeLift==='other'?'block':'none';
+  renderLiftPanel();
+}
+
+function logLift(){
+  const wEl=document.getElementById('inp-lift-weight');
+  const rEl=document.getElementById('inp-lift-reps');
+  const dEl=document.getElementById('inp-lift-date');
+  const nEl=document.getElementById('inp-lift-note');
+  const nmEl=document.getElementById('inp-lift-name');
+  const w=parseFloat(wEl.value);
+  const reps=parseInt(rEl.value);
+  const d=dEl.value||todayStr();
+  if(!w||w<0){showToast('Enter a valid weight',false);return;}
+  if(!reps||reps<1){showToast('Enter reps',false);return;}
+  if(activeLift==='other'&&!nmEl.value.trim()){showToast('Enter lift name',false);return;}
+
+  const liftName=activeLift==='other'?nmEl.value.trim():LIFT_LABELS[activeLift];
+  const liftKey=activeLift==='other'?nmEl.value.trim().toLowerCase().replace(/\s+/g,'-'):activeLift;
+
+  const state=loadTestState();
+  // Determine if PR (highest weight for this lift key)
+  const prev=state.lifts.filter(e=>e.key===liftKey);
+  const prevMax=prev.length?Math.max(...prev.map(e=>e.w)):0;
+  const isPR=w>prevMax;
+
+  state.lifts.push({key:liftKey,name:liftName,w,reps,d,note:nEl.value.trim(),ts:Date.now(),isPR});
+  state.lifts.sort((a,b)=>a.d.localeCompare(b.d));
+  saveTestState(state);
+
+  wEl.value='';rEl.value='';nEl.value='';dEl.value='';
+  if(activeLift==='other')nmEl.value='';
+
+  if(isPR)showToast(`🏆 New PR — ${liftName}!`,true);
+  else showToast('Lift logged ✓',false);
+
+  renderLiftPanel();
+  renderOverviewGoals();
+}
+
+function deleteLift(ts){
+  const state=loadTestState();
+  state.lifts=state.lifts.filter(e=>e.ts!==ts);
+  saveTestState(state);
+  renderLiftPanel();
+  renderOverviewGoals();
+}
+
+function renderLiftPanel(){
+  const state=loadTestState();
+  const liftKey=activeLift==='other'?'other':activeLift;
+  // For 'other', show all other lifts grouped; for named lifts, filter by key
+  const entries=activeLift==='other'
+    ? state.lifts.filter(e=>!Object.keys(LIFT_LABELS).slice(0,-1).includes(e.key))
+    : state.lifts.filter(e=>e.key===liftKey);
+
+  const bestsEl=document.getElementById('lift-bests');
+  const trendEl=document.getElementById('lift-trend');
+  const histEl=document.getElementById('lift-history');
+
+  if(!entries.length){
+    bestsEl.style.display='none';trendEl.style.display='none';
+    histEl.innerHTML='<div class="empty-state">No entries for this lift yet.</div>';return;
+  }
+
+  // PR / best
+  const best=entries.reduce((a,b)=>b.w>a.w?b:a);
+  const latest=entries[entries.length-1];
+  bestsEl.style.display='grid';
+  bestsEl.innerHTML=`
+    <div class="best-item"><div class="best-label">Current</div><div class="best-val">${latest.w}<span>lbs</span></div><div class="best-date">${fmtDate(latest.d)} × ${latest.reps}</div></div>
+    <div class="best-item"><div class="best-label">All-Time PR</div><div class="best-val">${best.w}<span>lbs</span></div><div class="best-date">${fmtDate(best.d)} × ${best.reps}</div></div>`;
+
+  // Trend (weight only)
+  const show=entries.slice(-12);
+  const mn2=Math.min(...show.map(e=>e.w));const mx2=Math.max(...show.map(e=>e.w));
+  const range2=mx2-mn2||1;
+  trendEl.style.display='flex';
+  trendEl.innerHTML=show.map((e,i)=>{
+    const h=Math.round(8+((e.w-mn2)/range2)*44);
+    const isLatest=i===show.length-1;
+    return `<div class="trend-bar${isLatest?' latest':''}" style="height:${h}px" data-tip="${e.w}lbs × ${e.reps} ${fmtDate(e.d)}"></div>`;
+  }).join('');
+
+  // History
+  const rows=[...entries].reverse().map(e=>{
+    return `<tr class="${e.isPR?'is-pr':''}">
+      <td>${fmtDate(e.d)}</td>
+      ${activeLift==='other'?`<td style="font-size:11px;color:var(--text2)">${e.name}</td>`:''}
+      <td class="val">${e.w}${e.isPR?'<span class="pr-badge">PR</span>':''}</td>
+      <td style="font-family:'JetBrains Mono';font-size:11px;color:var(--text2)">${e.reps} reps</td>
+      <td style="color:var(--text3);font-size:11px">${e.note||''}</td>
+      <td><button class="delete-entry-btn" onclick="deleteLift(${e.ts})">✕</button></td>
+    </tr>`;
+  }).join('');
+  const extraTh=activeLift==='other'?'<th>Lift</th>':'';
+  histEl.innerHTML=`<table class="history-table">
+    <thead><tr><th>Date</th>${extraTh}<th>Weight</th><th>Reps</th><th>Notes</th><th></th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+function renderOverviewGoals(){
+  const state=loadTestState();
+  // Weight
+  if(state.weights.length){
+    const latest=state.weights[state.weights.length-1];
+    document.getElementById('ov-weight').textContent=latest.w+' lbs';
+  }
+  // Lifts
+  const getPR=(key)=>{
+    const entries=state.lifts.filter(e=>e.key===key);
+    return entries.length?Math.max(...entries.map(e=>e.w)):null;
+  };
+  const bp=getPR('bench');const sq=getPR('squat');const dl=getPR('deadlift');
+  if(bp)document.getElementById('ov-bench').textContent=bp+' lbs';
+  if(sq)document.getElementById('ov-squat').textContent=sq+' lbs';
+  if(dl)document.getElementById('ov-dead').textContent=dl+' lbs';
+}
+
+function clearTestingData(){
+  localStorage.removeItem(TEST_KEY);
+  renderWeightPanel();
+  renderLiftPanel();
+  renderOverviewGoals();
+  showToast('Testing data cleared',false);
+}
+
+// Toast
+function showToast(msg,isPR){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='toast'+(isPR?' pr':'');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2600);
+}
+
+// ============================================================
+// WORKOUT RENDERING
+// ============================================================
+function renderWeekTabs(){
+  const el=document.getElementById('weekTabs');el.innerHTML='';
+  for(let w=1;w<=4;w++){
+    const days=PROGRAM[w];let total=0,done=0;
+    days.forEach((day,di)=>day.sections.forEach((sec,si)=>sec.exercises.forEach((ex,ei)=>{if(!ex.n)return;total++;if(isChecked(getKey(w,di,si,ei)))done++;})));
+    const pct=total?Math.round(done/total*100):0;
+    const tab=document.createElement('div');
+    tab.className='week-tab'+(w===currentWeek?' active':'');
+    tab.innerHTML=`${w===4?'W4 Deload':'Week '+w}<span class="pct">${pct}%</span>`;
+    tab.onclick=()=>{currentWeek=w;renderAll()};
+    el.appendChild(tab);
+  }
+}
+function renderDays(){
+  const el=document.getElementById('daysContainer');el.innerHTML='';
+  const days=PROGRAM[currentWeek];
+  days.forEach((day,di)=>{
+    let dayTotal=0,dayDone=0;
+    day.sections.forEach((sec,si)=>sec.exercises.forEach((ex,ei)=>{if(!ex.n)return;dayTotal++;if(isChecked(getKey(currentWeek,di,si,ei)))dayDone++;}));
+    const dayPct=dayTotal?Math.round(dayDone/dayTotal*100):0;
+    const completed=dayPct===100;
+    const card=document.createElement('div');
+    card.className='day-card'+(completed?' completed':'');
+    card.innerHTML=`
+      <div class="day-header" onclick="toggleDay(this,event)">
+        <h3><span class="tag ${day.tagClass}">${day.tag}</span>${day.title}<br><small style="font-weight:400;font-size:11px;color:var(--text2)">${day.subtitle}</small></h3>
+        <div class="day-progress"><span>${dayDone}/${dayTotal}</span><div class="check-ring${completed?' done':''}"></div></div>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${dayPct}%"></div></div>
+      <div class="day-body">${renderSections(day.sections,currentWeek,di)}</div>`;
+    el.appendChild(card);
+  });
+}
+function renderSections(sections,week,dayIdx){
+  return sections.map((sec,si)=>{
+    const sClass='s-'+sec.type;
+    const rows=sec.exercises.map((ex,ei)=>{
+      if(!ex.n)return '';
+      const key=getKey(week,dayIdx,si,ei);const checked=isChecked(key);
+      return `<div class="ex-row${checked?' done':''}">
+        <div class="ex-check${checked?' checked':''}" data-key="${key}" onclick="toggleCheck('${key}')"></div>
+        <div class="ex-info"><div class="ex-name">${ex.n}</div>
+        <div class="ex-detail"><span class="ex-reps">${ex.r}</span>${ex.note?`<span class="ex-notes">${ex.note}</span>`:''}</div></div>
+      </div>`;
+    }).join('');
+    return `<div class="section ${sClass}">
+      <div class="section-header" onclick="toggleSection(this,event)"><span>${sec.name}</span><span class="toggle">▼</span></div>
+      <div class="section-body">${rows}</div>
+    </div>`;
+  }).join('');
+}
+function renderOverview(){
+  const state=loadState();
+  let totalEx=0,doneEx=0,daysCompleted=0;
+  for(let w=1;w<=4;w++){PROGRAM[w].forEach((day,di)=>{let dt=0,dd=0;day.sections.forEach((sec,si)=>sec.exercises.forEach((ex,ei)=>{if(!ex.n)return;totalEx++;dt++;if(state[getKey(w,di,si,ei)]){doneEx++;dd++;}}));if(dt&&dd===dt)daysCompleted++;});}
+  document.getElementById('totalCompleted').textContent=daysCompleted;
+  document.getElementById('totalPct').textContent=totalEx?Math.round(doneEx/totalEx*100)+'%':'0%';
+  document.getElementById('weekNum').textContent=currentWeek;
+  let streak=0;
+  const dates=Object.values(state).filter(v=>typeof v==='number').sort((a,b)=>b-a);
+  if(dates.length>0){
+    const uniqueDays=new Set(dates.map(d=>new Date(d).toDateString()));
+    let check=new Date();
+    for(let i=0;i<30;i++){if(uniqueDays.has(check.toDateString()))streak++;else if(i>0)break;check=new Date(check.getTime()-86400000);}
+  }
+  document.getElementById('streakCount').textContent=streak;
+}
+function renderAll(){renderWeekTabs();renderDays();renderOverview();}
+
+// ============================================================
+// INTERACTIONS
+// ============================================================
+function toggleDay(el,evt){if(evt&&evt.target.closest('.ex-check'))return;el.closest('.day-card').classList.toggle('open');}
+function toggleSection(el,evt){if(evt&&evt.target.closest('.ex-check'))return;el.closest('.section').classList.toggle('collapsed');}
+function switchPage(page,btn){
+  currentPage=page;
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page'+page).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  if(page==='overview'){renderOverview();renderOverviewGoals();}
+  if(page==='testing'){renderWeightPanel();renderLiftPanel();}
+}
+function resetCurrentWeek(){
+  if(!confirm(`Reset all Week ${currentWeek} progress?`))return;
+  const state=loadState();const prefix=`w${currentWeek}`;
+  Object.keys(state).forEach(k=>{if(k.startsWith(prefix))delete state[k]});
+  saveState(state);renderAll();
+}
+function resetAll(){
+  if(!confirm('Reset ALL progress? This cannot be undone.'))return;
+  localStorage.removeItem(STORAGE_KEY);renderAll();
+}
+
+// Set today's date as default in inputs
+document.getElementById('inp-weight-date').value=todayStr();
+document.getElementById('inp-lift-date').value=todayStr();
+
+// Init
+renderAll();
+renderOverviewGoals();
+</script>
+</body>
+</html>

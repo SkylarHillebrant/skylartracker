@@ -1,27 +1,56 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import { data, initData } from './lib/stores/data.svelte'
+  import { session, initSession } from './lib/stores/session.svelte'
+  import { initSync, flush } from './lib/offline/sync'
+  import { importLegacyWeights } from './lib/migrate'
   import Today from './routes/Today.svelte'
   import Program from './routes/Program.svelte'
   import Progress from './routes/Progress.svelte'
+  import Settings from './routes/Settings.svelte'
+  import SyncBadge from './components/SyncBadge.svelte'
 
-  type Tab = 'today' | 'program' | 'progress'
-  let active = $state<Tab>('today')
+  type View = 'today' | 'program' | 'progress' | 'settings'
+  let active = $state<View>('today')
 
-  const tabs: { id: Tab; label: string }[] = [
+  const tabs: { id: View; label: string }[] = [
     { id: 'today', label: 'Today' },
     { id: 'program', label: 'Program' },
     { id: 'progress', label: 'Progress' },
   ]
 
-  onMount(() => {
-    void initData()
+  onMount(async () => {
+    await initData()
+    try {
+      await importLegacyWeights() // one-time, local; syncs after sign-in
+    } catch {
+      /* never let migration block auth/sync init */
+    }
+    await initSession()
+    await initSync()
+  })
+
+  // Push local changes + pull remote whenever we become signed in.
+  let prevUser: string | null = null
+  $effect(() => {
+    if (session.userId && session.userId !== prevUser) {
+      prevUser = session.userId
+      void flush()
+    } else if (!session.userId) {
+      prevUser = null // allow same-user re-login to re-sync
+    }
   })
 </script>
 
 <header class="header">
-  <span class="logo">SHRED</span>
-  <span class="tag">tracker</span>
+  <div class="brand">
+    <span class="logo">SHRED</span>
+    <span class="tag">tracker</span>
+  </div>
+  <div class="right">
+    <SyncBadge />
+    <button class="gear" class:on={active === 'settings'} onclick={() => (active = 'settings')} aria-label="Settings">⚙</button>
+  </div>
 </header>
 
 <main class="main">
@@ -31,8 +60,10 @@
     <Today onGoProgram={() => (active = 'program')} />
   {:else if active === 'program'}
     <Program />
-  {:else}
+  {:else if active === 'progress'}
     <Progress />
+  {:else}
+    <Settings />
   {/if}
 </main>
 
@@ -50,12 +81,18 @@
     top: 0;
     z-index: 10;
     display: flex;
-    align-items: baseline;
+    align-items: center;
+    justify-content: space-between;
     gap: 8px;
-    padding: calc(var(--safe-top) + 14px) 20px 14px;
+    padding: calc(var(--safe-top) + 14px) 18px 14px;
     background: color-mix(in srgb, var(--bg) 80%, transparent);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--border);
+  }
+  .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
   }
   .logo {
     font-weight: 900;
@@ -68,6 +105,22 @@
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.15em;
+  }
+  .right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .gear {
+    border: 0;
+    background: transparent;
+    color: var(--text3);
+    font-size: 18px;
+    line-height: 1;
+    padding: 2px;
+  }
+  .gear.on {
+    color: var(--accent2);
   }
 
   .main {

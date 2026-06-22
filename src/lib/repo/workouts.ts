@@ -3,6 +3,7 @@
 // for component convenience. Components read data.setLogs[...] directly.
 import { data } from '../stores/data.svelte'
 import * as db from '../offline/localdb'
+import { recordMutation } from '../offline/sync'
 import { PROGRAM, dayId as makeDayId, exerciseSlug } from '../program'
 import {
   computeCompletion,
@@ -92,6 +93,7 @@ export function updateSet(o: UpdateOpts): void {
   const next: SetLog = { ...baseLog, ...o.patch, updatedAt: Date.now() }
   data.setLogs[id] = next
   void db.putSetLog({ ...next })
+  recordMutation('setLogs', 'put', id, { ...next })
 }
 
 /** Toggle a single done-unit (warmup/cardio/mobility, or a set's done flag). */

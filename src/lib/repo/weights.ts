@@ -1,6 +1,7 @@
 // Weight-log mutations + derived deltas over the reactive `data` store.
 import { data, resortWeights } from '../stores/data.svelte'
 import * as db from '../offline/localdb'
+import { recordMutation } from '../offline/sync'
 import type { WeightEntry } from '../types'
 
 /** Upsert one weigh-in (one entry per date; same date overwrites). */
@@ -11,11 +12,13 @@ export function addWeight(weight: number, entryDate: string, note: string): void
   else data.weights.push(entry)
   resortWeights()
   void db.putWeight({ ...entry })
+  recordMutation('weights', 'put', entryDate, { ...entry })
 }
 
 export function deleteWeight(id: string): void {
   data.weights = data.weights.filter((w) => w.id !== id)
   void db.deleteWeightRow(id)
+  recordMutation('weights', 'delete', id, null)
 }
 
 /** History rows (newest-first) with change vs the previous (older) weigh-in. */

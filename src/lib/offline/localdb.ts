@@ -74,3 +74,35 @@ export async function putSession(v: SessionMeta) {
 export async function putProfile(v: Profile) {
   await (await db()).put('profile', v)
 }
+
+// ── Outbox (M3 sync queue) ─────────────────────────────────────────────────
+export async function enqueue(item: Omit<OutboxItem, 'seq'>): Promise<void> {
+  await (await db()).add('outbox', item as OutboxItem)
+}
+export async function pendingOutbox(): Promise<OutboxItem[]> {
+  const all = await (await db()).getAllFromIndex('outbox', 'bySynced', 0)
+  return all.sort((a, b) => (a.seq ?? 0) - (b.seq ?? 0))
+}
+export async function removeOutbox(seq: number): Promise<void> {
+  await (await db()).delete('outbox', seq)
+}
+/** Latest (highest-seq) pending outbox item for a table+key, if any. */
+export async function findPendingForKey(
+  table: OutboxItem['table'],
+  key: string,
+): Promise<OutboxItem | undefined> {
+  const all = await pendingOutbox() // ascending by seq
+  let found: OutboxItem | undefined
+  for (const it of all) if (it.table === table && it.key === key) found = it
+  return found
+}
+export async function updateOutbox(item: OutboxItem): Promise<void> {
+  await (await db()).put('outbox', item)
+}
+
+export async function getMeta<T = unknown>(k: string): Promise<T | undefined> {
+  return (await (await db()).get('meta', k))?.v as T | undefined
+}
+export async function setMeta(k: string, v: unknown): Promise<void> {
+  await (await db()).put('meta', { k, v })
+}

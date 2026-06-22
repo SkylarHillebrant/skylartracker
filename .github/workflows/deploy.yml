@@ -26,11 +26,9 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+      # Supabase URL + anon key (public, RLS-protected) come from the committed
+      # .env.production once M3 is configured; until then the build is local-only.
       - run: npm run build
-        env:
-          # Public, build-time. Empty until M3 sets the repo secrets — build still succeeds.
-          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

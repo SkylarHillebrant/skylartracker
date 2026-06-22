@@ -1,21 +1,25 @@
 <script lang="ts">
-  import type { Day } from '../lib/types'
+  import type { Day, WeekNumber } from '../lib/types'
   import { tagColor } from '../lib/program'
+  import { dayCompletion } from '../lib/repo/workouts'
   import Section from './Section.svelte'
 
   let {
     day,
+    week,
+    dayIndex,
     open = false,
     onToggle,
-  }: { day: Day; open?: boolean; onToggle?: () => void } = $props()
+  }: {
+    day: Day
+    week: WeekNumber
+    dayIndex: number
+    open?: boolean
+    onToggle?: () => void
+  } = $props()
 
   const color = $derived(tagColor(day.tag))
-  // Count real prescribed exercises (skip weigh-in + empty placeholder lines).
-  const exCount = $derived(
-    day.sections
-      .filter((s) => s.type !== 'weighin')
-      .reduce((n, s) => n + s.exercises.filter((e) => e.n !== '').length, 0),
-  )
+  const comp = $derived(dayCompletion(week, dayIndex, day))
 </script>
 
 <div class="card" class:open>
@@ -28,15 +32,20 @@
       <span class="subtitle">{day.subtitle}</span>
     </div>
     <div class="meta">
-      <span class="count">{exCount}</span>
+      {#if comp.done > 0}
+        <span class="pct" class:full={comp.pct === 100}>{comp.pct}%</span>
+      {/if}
+      <div class="ring" style="--p:{comp.pct}">
+        <span>{comp.done}/{comp.total}</span>
+      </div>
       <span class="chev" class:rot={open}>›</span>
     </div>
   </button>
 
   {#if open}
     <div class="body">
-      {#each day.sections as section, i (i)}
-        <Section {section} />
+      {#each day.sections as section, si (si)}
+        <Section {section} {week} {dayIndex} sectionIndex={si} />
       {/each}
     </div>
   {/if}
@@ -98,16 +107,25 @@
   .meta {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     flex-shrink: 0;
   }
-  .count {
+  .pct {
     font-family: var(--font-mono);
-    font-size: 12px;
+    font-size: 11px;
+    color: var(--accent2);
+  }
+  .pct.full {
+    color: var(--green);
+  }
+  .ring {
+    font-family: var(--font-mono);
+    font-size: 10px;
     color: var(--text2);
     background: var(--bg3);
     border-radius: 999px;
-    padding: 3px 9px;
+    padding: 3px 8px;
+    white-space: nowrap;
   }
   .chev {
     font-size: 20px;

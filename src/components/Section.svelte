@@ -1,9 +1,20 @@
 <script lang="ts">
-  import type { Section } from '../lib/types'
+  import type { Section, WeekNumber } from '../lib/types'
   import { sectionMeta } from '../lib/program'
   import ExerciseRow from './ExerciseRow.svelte'
 
-  let { section }: { section: Section } = $props()
+  let {
+    section,
+    week,
+    dayIndex,
+    sectionIndex,
+  }: {
+    section: Section
+    week: WeekNumber
+    dayIndex: number
+    sectionIndex: number
+  } = $props()
+
   const meta = $derived(sectionMeta(section.type))
 </script>
 
@@ -16,15 +27,15 @@
   {#if section.type === 'weighin'}
     <div class="weighin">Log today's weight on the Progress tab.</div>
   {:else}
-    {#each section.exercises as ex, i (i)}
-      <ExerciseRow {ex} />
+    {#each section.exercises as ex, ei (ei)}
+      <ExerciseRow {ex} {week} {dayIndex} {sectionIndex} exerciseIndex={ei} sectionType={section.type} />
     {/each}
   {/if}
 </div>
 
 <style>
   .section {
-    padding: 12px 0;
+    padding: 10px 0;
   }
   .shead {
     display: flex;

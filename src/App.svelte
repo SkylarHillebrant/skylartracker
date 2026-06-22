@@ -1,14 +1,22 @@
 <script lang="ts">
+  import { onMount } from 'svelte'
+  import { data, initData } from './lib/stores/data.svelte'
+  import Today from './routes/Today.svelte'
   import Program from './routes/Program.svelte'
+  import Progress from './routes/Progress.svelte'
 
   type Tab = 'today' | 'program' | 'progress'
-  let active = $state<Tab>('program')
+  let active = $state<Tab>('today')
 
   const tabs: { id: Tab; label: string }[] = [
     { id: 'today', label: 'Today' },
     { id: 'program', label: 'Program' },
     { id: 'progress', label: 'Progress' },
   ]
+
+  onMount(() => {
+    void initData()
+  })
 </script>
 
 <header class="header">
@@ -17,19 +25,14 @@
 </header>
 
 <main class="main">
-  {#if active === 'program'}
-    <Program />
+  {#if !data.ready}
+    <div class="loading">Loading…</div>
   {:else if active === 'today'}
-    <div class="placeholder">
-      <h2>Today</h2>
-      <p>Your current day's workout with per-set logging lands next (M2).</p>
-      <p class="hint">For now, browse the full block on the <b>Program</b> tab.</p>
-    </div>
+    <Today onGoProgram={() => (active = 'program')} />
+  {:else if active === 'program'}
+    <Program />
   {:else}
-    <div class="placeholder">
-      <h2>Progress</h2>
-      <p>Weight log, charts and milestones are coming in M3–M4.</p>
-    </div>
+    <Progress />
   {/if}
 </main>
 
@@ -71,25 +74,10 @@
     padding: 16px 20px;
     padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 24px);
   }
-
-  .placeholder {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 24px;
-  }
-  .placeholder h2 {
-    margin: 0 0 10px;
-    font-size: 20px;
-  }
-  .placeholder p {
-    color: var(--text2);
-    line-height: 1.5;
-    margin: 0 0 8px;
-  }
-  .placeholder .hint {
+  .loading {
+    text-align: center;
     color: var(--text3);
-    font-size: 14px;
+    padding: 40px 0;
   }
 
   .nav {

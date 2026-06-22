@@ -44,6 +44,20 @@ export function getSet(
   return data.setLogs[setLogId(makeDayId(week, dayIndex), si, ei, k)]
 }
 
+/** Heaviest logged set per exercise (surfaces the compound lifts) — for Progress. */
+export function strengthBests(limit = 6): Array<{ name: string; weight: number; reps: number | null }> {
+  const best = new Map<string, { name: string; weight: number; reps: number | null }>()
+  for (const id in data.setLogs) {
+    const l = data.setLogs[id]
+    if (l.weight == null) continue
+    const cur = best.get(l.exerciseSlug)
+    if (!cur || l.weight > cur.weight) {
+      best.set(l.exerciseSlug, { name: l.exerciseName, weight: l.weight, reps: l.reps })
+    }
+  }
+  return [...best.values()].sort((a, b) => b.weight - a.weight).slice(0, limit)
+}
+
 /** Most recent logged numbers for an exercise (across weeks) — used to prefill. */
 export function lastLoggedFor(name: string): { weight: number | null; reps: number | null } | null {
   const slug = exerciseSlug(name)

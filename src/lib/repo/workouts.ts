@@ -4,7 +4,7 @@
 import { data } from '../stores/data.svelte'
 import * as db from '../offline/localdb'
 import { recordMutation } from '../offline/sync.svelte'
-import { PROGRAM, dayId as makeDayId, exerciseSlug } from '../program'
+import { PROGRAM, WEEK_NUMBERS, dayId as makeDayId, exerciseSlug } from '../program'
 import {
   computeCompletion,
   isNumericSection,
@@ -32,6 +32,17 @@ export function weekCompletion(week: WeekNumber): Completion {
     total += c.total
   })
   return { done, total, pct: total ? Math.round((done / total) * 100) : 0 }
+}
+
+/** First day in the block that isn't fully logged — the user's next session. */
+export function nextWorkout(): { week: WeekNumber; dayIndex: number; day: Day } | null {
+  for (const w of WEEK_NUMBERS) {
+    const days = PROGRAM[w]
+    for (let i = 0; i < days.length; i++) {
+      if (dayCompletion(w, i, days[i]).pct < 100) return { week: w, dayIndex: i, day: days[i] }
+    }
+  }
+  return null
 }
 
 export function getSet(

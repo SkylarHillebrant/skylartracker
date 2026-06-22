@@ -16,10 +16,11 @@ export function parseSets(r: string): number {
 export const setLogId = (dayId: string, si: number, ei: number, k: number): string =>
   `${dayId}.s${si}.e${ei}.set${k}`
 
-/** Loggable units an exercise contributes (0 = not loggable, e.g. weigh-in/empty line). */
+/** Working-set units an exercise contributes to completion %. Warmup/cardio/
+ *  mobility are checkable but DON'T count (so a day reaches 100% on the lifts
+ *  alone and "next workout" advances even if you skip the cooldown). */
 export function unitsForExercise(sectionType: string, r: string, name: string): number {
   if (name === '') return 0
-  if (isToggleSection(sectionType)) return 1
   if (isNumericSection(sectionType)) return parseSets(r)
   return 0
 }

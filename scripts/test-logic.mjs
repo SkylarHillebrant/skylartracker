@@ -25,12 +25,12 @@ eq(parseSets('4×6 +load'), 4, 'parseSets weighted')
 
 // 2) unitsForExercise
 eq(unitsForExercise('straight', '5×5 @ 75%', 'Bench Press'), 5, 'units straight')
-eq(unitsForExercise('warmup', '2×20', 'Band Pull-Aparts'), 1, 'units warmup toggle')
-eq(unitsForExercise('cardio', '10-15 min', 'Incline Walk'), 1, 'units cardio toggle')
-eq(unitsForExercise('mobility', '2×30s', 'Stretch'), 1, 'units mobility toggle')
+eq(unitsForExercise('warmup', '2×20', 'Band Pull-Aparts'), 0, 'units warmup not counted')
+eq(unitsForExercise('cardio', '10-15 min', 'Incline Walk'), 0, 'units cardio not counted')
+eq(unitsForExercise('mobility', '2×30s', 'Stretch'), 0, 'units mobility not counted')
 eq(unitsForExercise('core', '3×15', 'Cable Crunch'), 3, 'units core')
 
-// 3) computeCompletion on a representative day (1 + 4 + 0 + 1 = 6)
+// 3) computeCompletion on a representative day — only the 4 working sets count
 const day = {
   title: 'T', subtitle: '', tag: 'chest', tagClass: '',
   sections: [
@@ -40,9 +40,9 @@ const day = {
     { type: 'mobility', name: 'm', exercises: [{ n: 'C', r: '30s', note: '' }] },
   ],
 }
-eq(computeCompletion(day, 'd', () => false), { done: 0, total: 6, pct: 0 }, 'completion none')
-eq(computeCompletion(day, 'd', () => true), { done: 6, total: 6, pct: 100 }, 'completion all')
-eq(computeCompletion(day, 'd', (k) => k.endsWith('.set0')), { done: 3, total: 6, pct: 50 }, 'completion half')
+eq(computeCompletion(day, 'd', () => false), { done: 0, total: 4, pct: 0 }, 'completion none')
+eq(computeCompletion(day, 'd', () => true), { done: 4, total: 4, pct: 100 }, 'completion all')
+eq(computeCompletion(day, 'd', (k) => k.endsWith('.set0')), { done: 1, total: 4, pct: 25 }, 'completion one set')
 
 // 4) sweep EVERY exercise in the real program (imported)
 const distinct = new Map()

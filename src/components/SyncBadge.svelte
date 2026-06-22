@@ -1,6 +1,6 @@
 <script lang="ts">
   import { session } from '../lib/stores/session.svelte'
-  import { sync } from '../lib/offline/sync'
+  import { sync } from '../lib/offline/sync.svelte'
 
   const badge = $derived.by(() => {
     if (!session.configured) return { t: 'Local', cls: 'muted' }

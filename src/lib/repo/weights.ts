@@ -1,7 +1,7 @@
 // Weight-log mutations + derived deltas over the reactive `data` store.
 import { data, resortWeights } from '../stores/data.svelte'
 import * as db from '../offline/localdb'
-import { recordMutation } from '../offline/sync'
+import { recordMutation } from '../offline/sync.svelte'
 import type { WeightEntry } from '../types'
 
 /** Upsert one weigh-in (one entry per date; same date overwrites). */

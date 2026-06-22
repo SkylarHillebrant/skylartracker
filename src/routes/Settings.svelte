@@ -1,6 +1,6 @@
 <script lang="ts">
   import { session, signOut } from '../lib/stores/session.svelte'
-  import { sync, flush } from '../lib/offline/sync'
+  import { sync, flush } from '../lib/offline/sync.svelte'
   import { importLegacyWeights } from '../lib/migrate'
   import { data } from '../lib/stores/data.svelte'
   import SignIn from '../components/SignIn.svelte'

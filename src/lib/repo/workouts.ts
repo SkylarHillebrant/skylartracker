@@ -3,7 +3,7 @@
 // for component convenience. Components read data.setLogs[...] directly.
 import { data } from '../stores/data.svelte'
 import * as db from '../offline/localdb'
-import { recordMutation } from '../offline/sync'
+import { recordMutation } from '../offline/sync.svelte'
 import { PROGRAM, dayId as makeDayId, exerciseSlug } from '../program'
 import {
   computeCompletion,

@@ -2,7 +2,7 @@
   import { onMount } from 'svelte'
   import { data, initData } from './lib/stores/data.svelte'
   import { session, initSession } from './lib/stores/session.svelte'
-  import { initSync, flush } from './lib/offline/sync'
+  import { initSync, flush } from './lib/offline/sync.svelte'
   import { importLegacyWeights } from './lib/migrate'
   import Today from './routes/Today.svelte'
   import Program from './routes/Program.svelte'

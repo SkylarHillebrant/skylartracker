@@ -1,7 +1,8 @@
 <script lang="ts">
-  // M0 shell: proves the build/deploy/install pipeline. Real routes land in M1+.
+  import Program from './routes/Program.svelte'
+
   type Tab = 'today' | 'program' | 'progress'
-  let active = $state<Tab>('today')
+  let active = $state<Tab>('program')
 
   const tabs: { id: Tab; label: string }[] = [
     { id: 'today', label: 'Today' },
@@ -16,26 +17,25 @@
 </header>
 
 <main class="main">
-  <div class="card">
-    <h1>Hello, SHRED 👋</h1>
-    <p class="muted">
-      The rebuild is live. This is the M0 scaffold — Svelte + Vite, deployed to GitHub
-      Pages and installable to your home screen.
-    </p>
-    <p class="muted small">
-      Next up: the weeks 9–12 program, then real per-set logging.
-    </p>
-    <div class="pill">build: M0 · {active}</div>
-  </div>
+  {#if active === 'program'}
+    <Program />
+  {:else if active === 'today'}
+    <div class="placeholder">
+      <h2>Today</h2>
+      <p>Your current day's workout with per-set logging lands next (M2).</p>
+      <p class="hint">For now, browse the full block on the <b>Program</b> tab.</p>
+    </div>
+  {:else}
+    <div class="placeholder">
+      <h2>Progress</h2>
+      <p>Weight log, charts and milestones are coming in M3–M4.</p>
+    </div>
+  {/if}
 </main>
 
-<nav class="nav" style="--nav-h: 64px;">
+<nav class="nav">
   {#each tabs as tab (tab.id)}
-    <button
-      class="navbtn"
-      class:activebtn={active === tab.id}
-      onclick={() => (active = tab.id)}
-    >
+    <button class="navbtn" class:activebtn={active === tab.id} onclick={() => (active = tab.id)}>
       {tab.label}
     </button>
   {/each}
@@ -68,38 +68,28 @@
   }
 
   .main {
-    padding: 20px;
+    padding: 16px 20px;
     padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 24px);
   }
-  .card {
+
+  .placeholder {
     background: var(--bg2);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 24px;
   }
-  h1 {
+  .placeholder h2 {
     margin: 0 0 10px;
-    font-size: 26px;
-    font-weight: 800;
+    font-size: 20px;
   }
-  .muted {
+  .placeholder p {
     color: var(--text2);
     line-height: 1.5;
-    margin: 0 0 10px;
+    margin: 0 0 8px;
   }
-  .small {
-    font-size: 14px;
+  .placeholder .hint {
     color: var(--text3);
-  }
-  .pill {
-    display: inline-block;
-    margin-top: 8px;
-    padding: 6px 12px;
-    border-radius: 999px;
-    background: color-mix(in srgb, var(--accent) 16%, transparent);
-    color: var(--accent2);
-    font-family: var(--font-mono);
-    font-size: 12px;
+    font-size: 14px;
   }
 
   .nav {

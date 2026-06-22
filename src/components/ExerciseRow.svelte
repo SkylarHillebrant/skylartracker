@@ -51,7 +51,12 @@
       <div class="title">
         <span class="nameline">
           <span class="name">{ex.n}</span>
-          <button class="search" onclick={lookUp} aria-label={`Look up ${ex.n}`}>🔍</button>
+          <button class="search" onclick={lookUp} aria-label={`Watch a demo of ${ex.n}`}>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="2.5" y="5" width="19" height="14" rx="3.5" />
+              <path d="M10 9.2 L15.5 12 L10 14.8 Z" />
+            </svg>
+          </button>
         </span>
         {#if ex.note}<span class="note">{ex.note}</span>{/if}
       </div>
@@ -104,10 +109,23 @@
     border: 0;
     background: transparent;
     padding: 0 2px;
-    font-size: 12px;
-    line-height: 1;
-    opacity: 0.55;
+    line-height: 0;
+    color: var(--accent2);
+    opacity: 0.7;
     flex-shrink: 0;
+  }
+  .search svg {
+    width: 17px;
+    height: 17px;
+    display: block;
+  }
+  .search svg rect {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+  .search svg path {
+    fill: currentColor;
   }
   .search:active {
     opacity: 1;

@@ -1,0 +1,32 @@
+{
+  // Navy theme for the skylartracker workspace (matches the app palette).
+  "workbench.colorCustomizations": {
+    "titleBar.activeBackground": "#0a1224",
+    "titleBar.activeForeground": "#e8ecf7",
+    "titleBar.inactiveBackground": "#081020",
+    "titleBar.border": "#243153",
+    "activityBar.background": "#0a1224",
+    "activityBar.foreground": "#e8ecf7",
+    "activityBar.inactiveForeground": "#5f6b8a",
+    "activityBar.border": "#243153",
+    "activityBarBadge.background": "#5c9eff",
+    "activityBarBadge.foreground": "#06122a",
+    "sideBar.background": "#0c1428",
+    "sideBar.foreground": "#cdd9ec",
+    "sideBar.border": "#243153",
+    "sideBarSectionHeader.background": "#111a33",
+    "editor.background": "#0a1224",
+    "editorGroupHeader.tabsBackground": "#081020",
+    "tab.activeBackground": "#0a1224",
+    "tab.activeForeground": "#e8ecf7",
+    "tab.inactiveBackground": "#081020",
+    "tab.activeBorderTop": "#5c9eff",
+    "statusBar.background": "#0a1224",
+    "statusBar.foreground": "#cdd9ec",
+    "statusBar.border": "#243153",
+    "panel.background": "#0a1224",
+    "panel.border": "#243153",
+    "terminal.background": "#0a1224",
+    "focusBorder": "#5c9eff"
+  }
+}

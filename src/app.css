@@ -1,0 +1,72 @@
+/* ── SHRED navy theme tokens ───────────────────────────────────────────────
+   Single source of truth for colors/spacing. Components reference these vars. */
+:root {
+  /* Navy surfaces (dark → light) */
+  --bg: #0a1224;
+  --bg2: #111a33;
+  --bg3: #18233f;
+  --border: #243153;
+
+  /* Text */
+  --text: #e8ecf7;
+  --text2: #9aa6c4;
+  --text3: #5f6b8a;
+
+  /* Accents */
+  --accent: #5c9eff;
+  --accent2: #8fc0ff;
+  --green: #4ade80;
+  --red: #f87171;
+
+  /* Type */
+  --font-sans: 'Outfit', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
+
+  /* Layout */
+  --nav-h: 64px;
+  --radius: 16px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100dvh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overscroll-behavior-y: none;
+}
+
+#app {
+  min-height: 100dvh;
+}
+
+button {
+  font-family: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* Prevent iOS zoom on input focus and remove number-spinner chrome */
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: 16px;
+}
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}

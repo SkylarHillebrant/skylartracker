@@ -1,12 +1,24 @@
 <script lang="ts">
+  import { untrack } from 'svelte'
   import { session, signOut } from '../lib/stores/session.svelte'
   import { sync, flush } from '../lib/offline/sync.svelte'
   import { importLegacyWeights } from '../lib/migrate'
   import { data } from '../lib/stores/data.svelte'
+  import { setGoalWeight } from '../lib/repo/profile'
   import SignIn from '../components/SignIn.svelte'
 
   let importMsg = $state('')
   let importing = $state(false)
+
+  let goalInput = $state(String(untrack(() => data.profile.goalWeight)))
+  let goalSaved = $state(false)
+  function saveGoal() {
+    const g = parseFloat(goalInput)
+    if (Number.isNaN(g) || g <= 0) return
+    setGoalWeight(g)
+    goalSaved = true
+    setTimeout(() => (goalSaved = false), 1500)
+  }
 
   async function runImport() {
     importing = true
@@ -22,6 +34,16 @@
     sync.lastSyncedAt ? new Date(sync.lastSyncedAt).toLocaleString() : 'not yet',
   )
 </script>
+
+<section class="card">
+  <h3>Goals</h3>
+  <p class="muted">Bench press target: <b>275 lb</b> · primary focus. Weight goal is secondary:</p>
+  <div class="goalrow">
+    <input type="number" inputmode="decimal" bind:value={goalInput} aria-label="Goal weight" />
+    <span class="unit">lb</span>
+    <button class="btn" onclick={saveGoal}>{goalSaved ? 'Saved ✓' : 'Save goal'}</button>
+  </div>
+</section>
 
 <section class="card">
   <h3>Cloud backup &amp; sync</h3>
@@ -109,5 +131,28 @@
     color: var(--accent2);
     font-size: 13px;
     margin: 10px 0 0;
+  }
+  .goalrow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .goalrow input {
+    width: 90px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    padding: 10px 12px;
+    font-family: var(--font-mono);
+  }
+  .goalrow input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .unit {
+    color: var(--text3);
+    font-size: 13px;
+    margin-right: auto;
   }
 </style>

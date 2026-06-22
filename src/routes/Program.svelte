@@ -5,7 +5,7 @@
   import type { WeekNumber } from '../lib/types'
   import DayCard from '../components/DayCard.svelte'
 
-  let { initialWeek = 9 as WeekNumber }: { initialWeek?: WeekNumber } = $props()
+  let { initialWeek = 1 as WeekNumber }: { initialWeek?: WeekNumber } = $props()
 
   let selectedWeek = $state<WeekNumber>(untrack(() => initialWeek))
   let openDay = $state<number>(0)

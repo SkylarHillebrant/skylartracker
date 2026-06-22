@@ -41,7 +41,7 @@
 <section class="card">
   <h3>Milestones</h3>
   <div class="miles">
-    {#each MILESTONES as m (m.date)}
+    {#each MILESTONES as m (m.label)}
       {@const hit = isHit(m.target, current)}
       <div class="mile" class:hit>
         <span class="mk">{hit ? '✓' : '○'}</span>
@@ -59,7 +59,7 @@
       <div class="wcol">
         <div class="track"><div class="bar" style="height:{Math.max(wk.pct, 2)}%"></div></div>
         <span class="wpct">{wk.pct}%</span>
-        <span class="wlbl">{weekLabel(wk.w).replace('Week ', 'W').replace('W11 Peak', 'W11').replace('W12 Deload', 'W12')}</span>
+        <span class="wlbl">{weekLabel(wk.w).replace('Week ', 'W').replace(' Deload', '')}</span>
       </div>
     {/each}
   </div>

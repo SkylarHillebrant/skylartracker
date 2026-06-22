@@ -28,7 +28,7 @@
     <span class="cap">Block complete</span>
   </div>
   <div class="bar"><div class="fill" style="width:{block.pct}%"></div></div>
-  <div class="sub">{block.done} of {block.total} sets logged across weeks 9–12</div>
+  <div class="sub">{block.done} of {block.total} sets logged this block (weeks 1–4)</div>
 </section>
 
 <section class="row">

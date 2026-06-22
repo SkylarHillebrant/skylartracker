@@ -1,15 +1,14 @@
-// Fixed weight milestones (ported from the legacy tracker / 2026 goals doc).
+// Weight checkpoints toward the secondary goal of 200 lb (muscle-gain block;
+// weight is not the primary driver — bench 275 is).
 export interface Milestone {
   label: string
-  date: string // YYYY-MM-DD
   target: number
 }
 
 export const MILESTONES: Milestone[] = [
-  { label: 'End of April', date: '2026-04-30', target: 220 },
-  { label: 'End of June', date: '2026-06-30', target: 210 },
-  { label: 'End of July', date: '2026-07-31', target: 205 },
-  { label: 'End of September', date: '2026-09-30', target: 195 },
+  { label: 'Down to 210', target: 210 },
+  { label: 'Down to 205', target: 205 },
+  { label: 'Goal · 200 lb', target: 200 },
 ]
 
 /** A milestone is "hit" once the latest weight is at or below its target. */

@@ -31,7 +31,7 @@ async function visit(label) {
 console.log('initial app len:', await page.$eval('#app', (el) => el.innerHTML.length).catch(() => 0))
 await visit('Program')
 await visit('Progress')
-await visit('⚙')
+await visit('Settings')
 await visit('Today')
 
 console.log(errors === 0 ? 'NO RUNTIME ERRORS ✓' : `${errors} RUNTIME ERRORS ✗`)

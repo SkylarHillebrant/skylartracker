@@ -35,7 +35,7 @@ export interface Day {
   sections: Section[]
 }
 
-export type WeekNumber = 9 | 10 | 11 | 12
+export type WeekNumber = 1 | 2 | 3 | 4
 
 /** The whole fixed program, keyed by week number. */
 export type ProgramData = Record<WeekNumber, Day[]>

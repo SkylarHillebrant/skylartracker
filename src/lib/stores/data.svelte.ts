@@ -4,9 +4,9 @@
 import type { SetLog, WeightEntry, Profile, SessionMeta } from '../types'
 import * as db from '../offline/localdb'
 
-// Legacy defaults (from tracker.html): goal 195, start 230.
+// Defaults for the MASS block: secondary weight goal 200 (muscle gain).
 function defaultProfile(): Profile {
-  return { id: 'me', goalWeight: 195, startWeight: 230, updatedAt: Date.now() }
+  return { id: 'me', goalWeight: 200, startWeight: 230, updatedAt: Date.now() }
 }
 
 export const data = $state({

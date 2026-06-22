@@ -4,12 +4,11 @@ import type { WeekNumber, Day } from './types'
 
 export { PROGRAM }
 
-export const WEEK_NUMBERS: WeekNumber[] = [9, 10, 11, 12]
+export const WEEK_NUMBERS: WeekNumber[] = [1, 2, 3, 4]
 
-/** Short tab label; week 11 is the peak, week 12 the deload (matches legacy). */
+/** Short tab label; week 4 is the deload at the end of the block. */
 export function weekLabel(w: WeekNumber): string {
-  if (w === 11) return 'W11 Peak'
-  if (w === 12) return 'W12 Deload'
+  if (w === 4) return 'W4 Deload'
   return `Week ${w}`
 }
 

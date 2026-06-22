@@ -35,6 +35,12 @@
   function tapPip(k: number) {
     setDone({ week, dayIndex, sectionIndex, exerciseIndex, setIndex: k, ex, maxes: data.maxes })
   }
+  function lookUp() {
+    // Strip parentheticals / qualifiers for a cleaner query, then open a demo search.
+    const q = ex.n.replace(/\(.*?\)/g, '').replace(/—.*$/, '').trim()
+    const url = `https://www.youtube.com/results?search_query=${encodeURIComponent('how to ' + q)}`
+    window.open(url, '_blank', 'noopener')
+  }
 </script>
 
 {#if ex.n === ''}
@@ -43,7 +49,10 @@
   <div class="ex">
     <div class="head">
       <div class="title">
-        <span class="name">{ex.n}</span>
+        <span class="nameline">
+          <span class="name">{ex.n}</span>
+          <button class="search" onclick={lookUp} aria-label={`Look up ${ex.n}`}>🔍</button>
+        </span>
         {#if ex.note}<span class="note">{ex.note}</span>{/if}
       </div>
       <span class="presc" class:warn={needsMax}>{presc}</span>
@@ -81,10 +90,27 @@
     min-width: 0;
     flex: 1;
   }
+  .nameline {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
   .name {
     font-size: 14px;
     font-weight: 600;
     color: var(--text);
+  }
+  .search {
+    border: 0;
+    background: transparent;
+    padding: 0 2px;
+    font-size: 12px;
+    line-height: 1;
+    opacity: 0.55;
+    flex-shrink: 0;
+  }
+  .search:active {
+    opacity: 1;
   }
   .note {
     font-size: 12px;

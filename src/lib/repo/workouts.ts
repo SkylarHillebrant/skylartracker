@@ -11,9 +11,10 @@ import {
   isToggleSection,
   parseSets,
   setLogId,
+  workingWeight,
   type Completion,
 } from '../logic'
-import type { Day, SetLog, WeekNumber } from '../types'
+import type { Day, Exercise, Maxes, SetLog, WeekNumber } from '../types'
 
 export { isNumericSection, isToggleSection, parseSets, setLogId }
 export type { Completion }
@@ -125,4 +126,36 @@ export function updateSet(o: UpdateOpts): void {
 export function toggleDone(o: Omit<UpdateOpts, 'patch'>): void {
   const current = getSet(o.week, o.dayIndex, o.sectionIndex, o.exerciseIndex, o.setIndex)
   updateSet({ ...o, patch: { completed: !current?.completed } })
+}
+
+/** Toggle a prescribed set done; on completion, records the computed weight + reps
+ *  (so Progress charts still track strength without any manual input). */
+export function setDone(o: {
+  week: WeekNumber
+  dayIndex: number
+  sectionIndex: number
+  exerciseIndex: number
+  setIndex: number
+  ex: Exercise
+  maxes: Maxes
+}): void {
+  const wasDone = getSet(o.week, o.dayIndex, o.sectionIndex, o.exerciseIndex, o.setIndex)?.completed ?? false
+  const completed = !wasDone
+  let weight: number | null = null
+  let reps: number | null = null
+  if (completed && o.ex.lift && o.ex.pct != null) {
+    weight = workingWeight(o.ex.lift, o.ex.pct, o.maxes)
+    const r = o.ex.reps ? parseInt(o.ex.reps, 10) : NaN
+    reps = Number.isNaN(r) ? null : r
+  }
+  updateSet({
+    week: o.week,
+    dayIndex: o.dayIndex,
+    sectionIndex: o.sectionIndex,
+    exerciseIndex: o.exerciseIndex,
+    setIndex: o.setIndex,
+    exerciseName: o.ex.n,
+    targetReps: o.ex.r,
+    patch: { completed, weight, reps },
+  })
 }

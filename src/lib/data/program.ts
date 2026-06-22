@@ -2,17 +2,44 @@
 // Built for: muscle gain + bench press toward a 275 max (working off a ~235 max).
 // Hand-authored (replaces the legacy SHRED block). 6 days/week, full gym.
 // Bench/squat/deadlift/incline loads are % of CURRENT max; accessories are rep ranges.
-import type { Day, Exercise, ProgramData } from '../types'
+import type { Day, Exercise, LiftKey, ProgramData } from '../types'
 
 type Wk = 1 | 2 | 3 | 4
+type Sched = Record<Wk, { sets: number; reps: string; pct: number }>
 
-// ── Main-lift weekly progression (W1-3 build, W4 deload) ────────────────────
-const BENCH: Record<Wk, string> = { 1: '5×5 @ 75%', 2: '5×5 @ 78%', 3: '4×4 @ 84%', 4: '3×5 @ 65%' }
-const INCLINE: Record<Wk, string> = { 1: '4×8 @ 65%', 2: '4×8 @ 68%', 3: '4×6 @ 72%', 4: '3×8 @ 58%' }
-const SQUAT: Record<Wk, string> = { 1: '4×6 @ 72%', 2: '4×6 @ 76%', 3: '5×4 @ 82%', 4: '3×5 @ 60%' }
-const DEADLIFT: Record<Wk, string> = { 1: '3×5 @ 72%', 2: '3×5 @ 76%', 3: '4×3 @ 82%', 4: '2×5 @ 60%' }
+// ── Main-lift weekly progression (W1-3 build, W4 deload). pct = of 1RM. ──────
+const BENCH: Sched = {
+  1: { sets: 5, reps: '5', pct: 0.75 }, 2: { sets: 5, reps: '5', pct: 0.78 },
+  3: { sets: 4, reps: '4', pct: 0.84 }, 4: { sets: 3, reps: '5', pct: 0.65 },
+}
+const INCLINE: Sched = {
+  1: { sets: 4, reps: '8', pct: 0.65 }, 2: { sets: 4, reps: '8', pct: 0.68 },
+  3: { sets: 4, reps: '6', pct: 0.72 }, 4: { sets: 3, reps: '8', pct: 0.58 },
+}
+const SQUAT: Sched = {
+  1: { sets: 4, reps: '6', pct: 0.72 }, 2: { sets: 4, reps: '6', pct: 0.76 },
+  3: { sets: 5, reps: '4', pct: 0.82 }, 4: { sets: 3, reps: '5', pct: 0.6 },
+}
+const DEADLIFT: Sched = {
+  1: { sets: 3, reps: '5', pct: 0.72 }, 2: { sets: 3, reps: '5', pct: 0.76 },
+  3: { sets: 4, reps: '3', pct: 0.82 }, 4: { sets: 2, reps: '5', pct: 0.6 },
+}
 const PULLUP: Record<Wk, string> = { 1: '4×8', 2: '4×8', 3: '4×6 +load', 4: '3×8' }
 const deload = (w: Wk, base: string): string => (w === 4 ? `${base} · deload` : base)
+
+// Build a computed main-lift exercise (weight shown = % of the user's 1RM).
+function mainLift(name: string, lift: LiftKey, sched: Sched, w: Wk, note: string): Exercise {
+  const s = sched[w]
+  return {
+    n: name,
+    r: `${s.sets}×${s.reps}`,
+    note: w === 4 ? `${note} · deload` : note,
+    lift,
+    pct: s.pct,
+    sets: s.sets,
+    reps: s.reps,
+  }
+}
 
 // ── Reusable warmups / cooldowns ────────────────────────────────────────────
 const WU_PUSH: Exercise[] = [
@@ -55,7 +82,7 @@ function pushA(w: Wk): Day {
       {
         type: 'straight',
         name: 'Bench Press — Strength',
-        exercises: [{ n: 'Bench Press', r: deload(w, BENCH[w]), note: '% of your ~235 max → 275 goal. Rest 2–3 min.' }],
+        exercises: [mainLift('Bench Press', 'bench', BENCH, w, 'Rest 2–3 min — driving toward a 275 max')],
       },
       {
         type: 'superset',
@@ -121,7 +148,7 @@ function legsA(w: Wk): Day {
     tagClass: 'tag-legs',
     sections: [
       { type: 'warmup', name: 'Warmup — Hip & Knee Prep', exercises: WU_LEGS },
-      { type: 'straight', name: 'Back Squat — Strength', exercises: [{ n: 'Back Squat', r: deload(w, SQUAT[w]), note: 'Below parallel — brace hard' }] },
+      { type: 'straight', name: 'Back Squat — Strength', exercises: [mainLift('Back Squat', 'squat', SQUAT, w, 'Below parallel — brace hard')] },
       { type: 'straight', name: 'Leg Press', exercises: [{ n: 'Leg Press', r: '3×10-12', note: 'Full ROM, controlled' }] },
       {
         type: 'superset',
@@ -146,7 +173,7 @@ function pushB(w: Wk): Day {
     tagClass: 'tag-shoulder',
     sections: [
       { type: 'warmup', name: 'Warmup — Shoulder & Press Prep', exercises: WU_PUSH },
-      { type: 'straight', name: 'Incline Bench Press — Primary', exercises: [{ n: 'Incline Barbell Press', r: deload(w, INCLINE[w]), note: 'Upper chest + bench carryover' }] },
+      { type: 'straight', name: 'Incline Bench Press — Primary', exercises: [mainLift('Incline Barbell Press', 'incline', INCLINE, w, 'Upper chest + bench carryover')] },
       {
         type: 'superset',
         name: 'Superset A — Flat DB + Fly',
@@ -225,7 +252,7 @@ function legsB(w: Wk): Day {
     tagClass: 'tag-dead',
     sections: [
       { type: 'warmup', name: 'Warmup — Hip & Hinge Prep', exercises: WU_LEGS },
-      { type: 'straight', name: 'Deadlift — Strength', exercises: [{ n: 'Deadlift', r: deload(w, DEADLIFT[w]), note: 'Brace, neutral spine — reset each rep' }] },
+      { type: 'straight', name: 'Deadlift — Strength', exercises: [mainLift('Deadlift', 'deadlift', DEADLIFT, w, 'Brace, neutral spine — reset each rep')] },
       { type: 'straight', name: 'Hack Squat / Front Squat', exercises: [{ n: 'Hack Squat', r: '3×10-12', note: 'Quads — controlled' }] },
       {
         type: 'superset',

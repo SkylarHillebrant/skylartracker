@@ -12,11 +12,27 @@ export type SectionType =
   | 'mobility'
   | 'weighin'
 
-/** A prescribed exercise line. n = name, r = prescription (e.g. "4×8 @ 68-72%"), note = cue. */
+/** Lifts whose 1-rep max drives a computed working weight. */
+export type LiftKey = 'bench' | 'squat' | 'deadlift' | 'incline'
+
+/** User-entered 1-rep maxes (incline is derived from bench). */
+export interface Maxes {
+  bench?: number
+  squat?: number
+  deadlift?: number
+}
+
+/** A prescribed exercise line.
+ *  - Main lifts set lift+pct+sets+reps → the app computes "weight × reps".
+ *  - Accessories just use r (e.g. "3×10-12") and are pick-by-feel. */
 export interface Exercise {
   n: string
   r: string
   note: string
+  lift?: LiftKey
+  pct?: number
+  sets?: number
+  reps?: string
 }
 
 export interface Section {

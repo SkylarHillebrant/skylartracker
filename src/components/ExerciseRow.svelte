@@ -1,7 +1,8 @@
 <script lang="ts">
   import type { Exercise, WeekNumber } from '../lib/types'
-  import { isNumericSection, isToggleSection, parseSets, getSet, toggleDone } from '../lib/repo/workouts'
-  import SetLogRow from './SetLogRow.svelte'
+  import { isNumericSection, isToggleSection, getSet, toggleDone, setDone } from '../lib/repo/workouts'
+  import { setCount, prescription } from '../lib/logic'
+  import { data } from '../lib/stores/data.svelte'
 
   let {
     ex,
@@ -21,18 +22,19 @@
 
   const numeric = $derived(isNumericSection(sectionType))
   const toggle = $derived(isToggleSection(sectionType))
-  const sets = $derived(numeric ? parseSets(ex.r) : 0)
+  const sets = $derived(numeric ? setCount(ex) : 0)
+  const presc = $derived(prescription(ex, data.maxes))
+  const needsMax = $derived(Boolean(ex.lift && ex.pct != null && presc.includes('set your')))
 
-  const base = $derived({
-    week,
-    dayIndex,
-    sectionIndex,
-    exerciseIndex,
-    setIndex: 0,
-    exerciseName: ex.n,
-    targetReps: ex.r,
-  })
-  const toggleDoneState = $derived(getSet(week, dayIndex, sectionIndex, exerciseIndex, 0)?.completed ?? false)
+  const toggleState = $derived(getSet(week, dayIndex, sectionIndex, exerciseIndex, 0)?.completed ?? false)
+  const base = $derived({ week, dayIndex, sectionIndex, exerciseIndex, setIndex: 0, exerciseName: ex.n, targetReps: ex.r })
+
+  function pipDone(k: number): boolean {
+    return getSet(week, dayIndex, sectionIndex, exerciseIndex, k)?.completed ?? false
+  }
+  function tapPip(k: number) {
+    setDone({ week, dayIndex, sectionIndex, exerciseIndex, setIndex: k, ex, maxes: data.maxes })
+  }
 </script>
 
 {#if ex.n === ''}
@@ -44,24 +46,18 @@
         <span class="name">{ex.n}</span>
         {#if ex.note}<span class="note">{ex.note}</span>{/if}
       </div>
-      {#if ex.r}<span class="target">{ex.r}</span>{/if}
+      <span class="presc" class:warn={needsMax}>{presc}</span>
       {#if toggle}
-        <button class="tdone" class:on={toggleDoneState} onclick={() => toggleDone(base)} aria-label="Mark done">✓</button>
+        <button class="tdone" class:on={toggleState} onclick={() => toggleDone(base)} aria-label="Mark done">✓</button>
       {/if}
     </div>
 
     {#if numeric}
-      <div class="sets">
+      <div class="pips">
         {#each Array.from({ length: sets }) as _, k (k)}
-          <SetLogRow
-            {week}
-            {dayIndex}
-            {sectionIndex}
-            {exerciseIndex}
-            setIndex={k}
-            exerciseName={ex.n}
-            targetReps={ex.r}
-          />
+          <button class="pip" class:done={pipDone(k)} onclick={() => tapPip(k)} aria-label={`Set ${k + 1}`}>
+            {k + 1}
+          </button>
         {/each}
       </div>
     {/if}
@@ -95,14 +91,21 @@
     color: var(--text3);
     line-height: 1.35;
   }
-  .target {
+  .presc {
     flex-shrink: 0;
     font-family: var(--font-mono);
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 700;
     color: var(--accent2);
     white-space: nowrap;
     padding-top: 1px;
+  }
+  .presc.warn {
+    color: var(--red);
+    font-size: 11px;
+    white-space: normal;
+    text-align: right;
+    max-width: 130px;
   }
   .tdone {
     flex: 0 0 34px;
@@ -118,8 +121,27 @@
     border-color: var(--green);
     color: var(--green);
   }
-  .sets {
-    margin-top: 6px;
+  .pips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .pip {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text3);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .pip.done {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #06122a;
   }
   .noteline {
     padding: 8px 0;

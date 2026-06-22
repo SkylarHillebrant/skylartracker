@@ -3,12 +3,27 @@
   import { session, signOut } from '../lib/stores/session.svelte'
   import { sync, flush } from '../lib/offline/sync.svelte'
   import { importLegacyWeights } from '../lib/migrate'
-  import { data } from '../lib/stores/data.svelte'
+  import { data, setMaxes } from '../lib/stores/data.svelte'
   import { setGoalWeight } from '../lib/repo/profile'
   import SignIn from '../components/SignIn.svelte'
 
   let importMsg = $state('')
   let importing = $state(false)
+
+  const seed = (n: number | undefined) => (n ? String(n) : '')
+  let benchInput = $state(seed(untrack(() => data.maxes.bench)))
+  let squatInput = $state(seed(untrack(() => data.maxes.squat)))
+  let deadliftInput = $state(seed(untrack(() => data.maxes.deadlift)))
+  let maxSaved = $state(false)
+  function saveMaxes() {
+    const p = (s: string) => {
+      const n = parseFloat(s)
+      return Number.isNaN(n) || n <= 0 ? undefined : n
+    }
+    void setMaxes({ bench: p(benchInput), squat: p(squatInput), deadlift: p(deadliftInput) })
+    maxSaved = true
+    setTimeout(() => (maxSaved = false), 1500)
+  }
 
   let goalInput = $state(String(untrack(() => data.profile.goalWeight)))
   let goalSaved = $state(false)
@@ -34,6 +49,17 @@
     sync.lastSyncedAt ? new Date(sync.lastSyncedAt).toLocaleString() : 'not yet',
   )
 </script>
+
+<section class="card">
+  <h3>Your 1-rep maxes</h3>
+  <p class="muted">Every working weight is computed from these. Update anytime — your sets re-calculate instantly. Incline is estimated from your bench.</p>
+  <div class="maxgrid">
+    <label><span>Bench</span><input type="number" inputmode="decimal" bind:value={benchInput} placeholder="—" /></label>
+    <label><span>Squat</span><input type="number" inputmode="decimal" bind:value={squatInput} placeholder="—" /></label>
+    <label><span>Deadlift</span><input type="number" inputmode="decimal" bind:value={deadliftInput} placeholder="—" /></label>
+  </div>
+  <button class="btn" onclick={saveMaxes}>{maxSaved ? 'Saved ✓' : 'Save maxes'}</button>
+</section>
 
 <section class="card">
   <h3>Goals</h3>
@@ -131,6 +157,36 @@
     color: var(--accent2);
     font-size: 13px;
     margin: 10px 0 0;
+  }
+  .maxgrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .maxgrid label {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .maxgrid label span {
+    font-size: 11px;
+    color: var(--text3);
+  }
+  .maxgrid input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    padding: 10px;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 16px;
+  }
+  .maxgrid input:focus {
+    outline: none;
+    border-color: var(--accent);
   }
   .goalrow {
     display: flex;

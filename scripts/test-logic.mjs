@@ -1,6 +1,15 @@
-// Verifies the pure logging logic against explicit cases, a representative day,
-// AND every exercise in the real (new) program. Run: node scripts/test-logic.mjs
-import { parseSets, unitsForExercise, computeCompletion } from '../src/lib/logic.ts'
+// Verifies the pure logic — set parsing, completion, AND the new load math
+// (computed working weights from 1-rep maxes) — plus a sweep of the real program.
+// Run: node scripts/test-logic.mjs
+import {
+  parseSets,
+  unitsForExercise,
+  computeCompletion,
+  round5,
+  workingWeight,
+  prescription,
+  setCount,
+} from '../src/lib/logic.ts'
 import { PROGRAM } from '../src/lib/data/program.ts'
 
 let pass = 0
@@ -13,24 +22,35 @@ function eq(actual, expected, label) {
   }
 }
 
-// 1) parseSets explicit cases
-eq(parseSets('5×5 @ 75%'), 5, 'parseSets bench')
-eq(parseSets('4×4 @ 84%'), 4, 'parseSets heavy')
-eq(parseSets('3×8-10'), 3, 'parseSets range')
+// 1) parseSets
+eq(parseSets('5×5'), 5, 'parseSets 5x5')
+eq(parseSets('3×10-12'), 3, 'parseSets range')
 eq(parseSets('3×10 each'), 3, 'parseSets each')
-eq(parseSets('3×5 @ 65% · deload'), 3, 'parseSets deload-suffixed keeps set count')
 eq(parseSets('10-15 min'), 1, 'parseSets cardio')
-eq(parseSets('2×30s each'), 2, 'parseSets seconds')
-eq(parseSets('4×6 +load'), 4, 'parseSets weighted')
 
-// 2) unitsForExercise
-eq(unitsForExercise('straight', '5×5 @ 75%', 'Bench Press'), 5, 'units straight')
-eq(unitsForExercise('warmup', '2×20', 'Band Pull-Aparts'), 0, 'units warmup not counted')
-eq(unitsForExercise('cardio', '10-15 min', 'Incline Walk'), 0, 'units cardio not counted')
-eq(unitsForExercise('mobility', '2×30s', 'Stretch'), 0, 'units mobility not counted')
-eq(unitsForExercise('core', '3×15', 'Cable Crunch'), 3, 'units core')
+// 2) unitsForExercise (now takes the exercise; uses sets field when present)
+eq(unitsForExercise('straight', { n: 'Bench', r: '5×5', sets: 5 }), 5, 'units uses sets field')
+eq(unitsForExercise('straight', { n: 'Acc', r: '3×10-12' }), 3, 'units parses r when no sets')
+eq(unitsForExercise('warmup', { n: 'Band', r: '2×20' }), 0, 'units warmup not counted')
+eq(unitsForExercise('cardio', { n: 'Walk', r: '10 min' }), 0, 'units cardio not counted')
+eq(unitsForExercise('weighin', { n: '', r: '' }), 0, 'units empty')
+eq(unitsForExercise('core', { n: 'Crunch', r: '3×15' }), 3, 'units core')
 
-// 3) computeCompletion on a representative day — only the 4 working sets count
+// 2b) LOAD MATH — the core of the new model
+eq(round5(176.25), 175, 'round5 176.25 → 175')
+eq(round5(197.4), 195, 'round5 197.4 → 195')
+eq(workingWeight('bench', 0.75, { bench: 235 }), 175, 'bench 75% of 235')
+eq(workingWeight('bench', 0.84, { bench: 235 }), 195, 'bench 84% of 235')
+eq(workingWeight('squat', 0.72, { squat: 300 }), 215, 'squat 72% of 300')
+eq(workingWeight('incline', 0.65, { bench: 235 }), 130, 'incline derived from bench')
+eq(workingWeight('bench', 0.75, {}), null, 'no max → null')
+eq(setCount({ n: 'B', r: '5×5', sets: 5 }), 5, 'setCount uses sets')
+eq(setCount({ n: 'A', r: '3×10-12' }), 3, 'setCount parses r')
+eq(prescription({ n: 'Bench', r: '5×5', lift: 'bench', pct: 0.75, sets: 5, reps: '5' }, { bench: 235 }), '175 lb × 5', 'prescription computed')
+eq(prescription({ n: 'Bench', r: '5×5', lift: 'bench', pct: 0.75, sets: 5, reps: '5' }, {}), '75% · set your bench max', 'prescription no max')
+eq(prescription({ n: 'Curl', r: '3×10-12' }, {}), '10-12 reps', 'prescription accessory')
+
+// 3) computeCompletion — only working sets count (warmup/mobility = 0)
 const day = {
   title: 'T', subtitle: '', tag: 'chest', tagClass: '',
   sections: [
@@ -44,35 +64,32 @@ eq(computeCompletion(day, 'd', () => false), { done: 0, total: 4, pct: 0 }, 'com
 eq(computeCompletion(day, 'd', () => true), { done: 4, total: 4, pct: 100 }, 'completion all')
 eq(computeCompletion(day, 'd', (k) => k.endsWith('.set0')), { done: 1, total: 4, pct: 25 }, 'completion one set')
 
-// 4) sweep EVERY exercise in the real program (imported)
-const distinct = new Map()
-let strings = 0
-let suspect = 0
+// 4) sweep the real program — every working exercise; spot-check computed bench weights
 let days = 0
+let suspect = 0
+const MAXES = { bench: 235, squat: 300, deadlift: 350 }
+const benchByWeek = {}
 for (const w of [1, 2, 3, 4]) {
   for (const d of PROGRAM[w]) {
     days++
     for (const s of d.sections) {
-      for (const ex of s.exercises) {
+      for (let ei = 0; ei < s.exercises.length; ei++) {
+        const ex = s.exercises[ei]
         if (ex.n === '') continue
-        const u = unitsForExercise(s.type, ex.r, ex.n)
-        strings++
+        const u = unitsForExercise(s.type, ex)
         if (!Number.isInteger(u) || u < 0 || u > 10) {
           suspect++
-          console.log(`  SUSPECT units=${u} type=${s.type} r="${ex.r}" (${ex.n})`)
+          console.log(`  SUSPECT units=${u} type=${s.type} "${ex.n}" r=${ex.r}`)
         }
-        distinct.set(ex.r, parseSets(ex.r))
+        if (ex.lift === 'bench') benchByWeek[w] = prescription(ex, MAXES)
       }
     }
   }
 }
-eq(days, 24, 'program has 24 days (4 weeks × 6)')
-eq(suspect, 0, `program sweep: ${strings} exercises, 0 suspect`)
-
-console.log(`\nDistinct rep prescriptions → sets parsed (${distinct.size}):`)
-;[...distinct.entries()].sort((a, b) => a[0].localeCompare(b[0])).forEach(([r, n]) =>
-  console.log(`  ${String(n).padStart(2)}  ${r}`),
-)
+eq(days, 24, 'program has 24 days')
+eq(suspect, 0, 'no suspect set counts')
+console.log('\nBench prescription by week (235 max):')
+for (const w of [1, 2, 3, 4]) console.log(`  W${w}: ${benchByWeek[w]}`)
 
 console.log(`\n${pass} passed, ${fail} failed`)
 process.exit(fail ? 1 : 0)
